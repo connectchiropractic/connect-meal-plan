@@ -11,17 +11,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Meal Plan">
 <title>Connect Meal Plan Maker</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Oswald:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Lato:wght@400;700;900&display=swap">
 <style>html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <style>
 /* Layout: white throughout (one light theme by request), a white brand bar with the black logo, a five-question setup card, then the plan with tabs. Flyer sale prices wear a green price tag. */
 :root{
-  --bg:#ffffff; --surface:#ffffff; --ink:#1E3932; --muted:#566a60; --line:#dfe5e1; --field:#f5f8f6;
+  --bg:#FBFCFB; --surface:#ffffff; --ink:#13201C; --head:#1E3932; --muted:#55665e; --line:#e1e6e3; --field:#ffffff;
   --green:#00704A; --green-soft:#D4E9E2; --on-green:#ffffff; --brand:#ffffff; --on-brand:#1E3932; --brand-dim:#566a60;
   --tag:#00704A; --tag-ink:#ffffff; --warn:#96490f; --over:#b3261e;
-  --display:"Oswald","Barlow Condensed","Arial Narrow",sans-serif;
-  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  --display:"Archivo",ui-sans-serif,system-ui,sans-serif;
+  --body:"Lato",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Lato",ui-sans-serif,system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
@@ -136,70 +136,161 @@ td.r,th.r{text-align:right;white-space:nowrap}
 .copybox{width:100%;min-height:180px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--field);color:var(--ink);font:13px/1.5 var(--body)}
 footer{max-width:1080px;margin:0 auto;padding:0 16px 48px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:6px}
 footer b{color:var(--ink);font-family:var(--display);font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+
+/* ---- Connect website look: Archivo headings, Lato body, one-question-at-a-time card on a forest-green hero ---- */
+body{font-size:16px}
+h2{font-weight:600;letter-spacing:-.02em;color:var(--head);font-size:22px}
+h3{font-family:var(--display);font-weight:600;letter-spacing:-.01em;color:var(--head)}
+.label{font-weight:700;letter-spacing:.16em;font-size:11px}
+th{font-weight:700;letter-spacing:.14em}
+.btn{font-family:var(--display);font-weight:700;border-radius:6px}
+.btn.primary{text-transform:uppercase;letter-spacing:.06em;font-size:14px;padding:12px 20px}
+.btn.sm{font-family:var(--body);font-weight:700;text-transform:none;letter-spacing:0;font-size:13px;padding:5px 10px}
+.summary .big{font-weight:700;letter-spacing:-.02em}.cost{font-weight:700}
+.meal,.store,.summary,.planbar,.notes,.empty{border-radius:14px}
+header.site{background:#fff;border-bottom:1px solid var(--line)}
+header.site .in{max-width:1080px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap}
+header.site .logo{height:40px;margin:0}
+header.site .brand{display:flex;align-items:center;gap:14px}
+header.site .name{font-family:var(--display);font-weight:700;color:var(--head);letter-spacing:-.01em;font-size:17px;padding-left:14px;border-left:1px solid var(--line)}
+header.site .week{align-items:flex-end;text-align:right}
+header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15px;color:var(--head)}
+.hero{position:relative;overflow:hidden;background:#0F241E;color:#fff}
+.hero::before{content:"";position:absolute;inset:0;background:#1E3932 url("https://images.unsplash.com/photo-1605522283494-4901a98d458e?auto=format&fit=crop&w=1800&q=70") center/cover no-repeat;opacity:.6}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to right,#0F241E 0%,rgba(15,36,30,.85) 50%,rgba(15,36,30,.4) 100%)}
+.hero .in{position:relative;z-index:1}
+.hero .in{max-width:1080px;margin:0 auto;padding:44px 16px 60px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:44px;align-items:start}
+.eyebrow{font:700 11px/1.5 var(--body);letter-spacing:.18em;text-transform:uppercase;color:#D4E9E2;margin:0 0 14px}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(32px,5.4vw,52px);line-height:1.04;letter-spacing:-.022em;text-transform:none;color:#fff;margin:0}
+.hero .lead{color:#e3ede8;font-size:17px;line-height:1.5;max-width:44ch;margin:18px 0 0}
+.hero ul{margin:22px 0 0;padding-left:20px;color:#e3ede8;display:flex;flex-direction:column;gap:10px;max-width:46ch}
+.wiz{background:#fff;color:var(--ink);border-radius:14px;padding:28px;box-shadow:0 30px 80px -30px rgba(0,0,0,.65);display:flex;flex-direction:column;gap:18px;min-width:0}
+.prog{display:flex;align-items:center;gap:12px}
+.prog .track{flex:1;height:6px;border-radius:99px;background:rgba(0,0,0,.1);overflow:hidden}
+.prog i{display:block;height:100%;background:#00704A;border-radius:99px;transition:width .2s}
+.prog span{font-size:12px;font-weight:700;color:rgba(0,0,0,.45);font-variant-numeric:tabular-nums}
+.q{display:flex;flex-direction:column;gap:12px;min-width:0}
+.qt{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.25;letter-spacing:-.02em;color:var(--head);margin:0}
+.qs{margin:-6px 0 0;color:var(--muted);font-size:14px}
+.wiz .chips{display:grid;grid-template-columns:1fr;gap:8px}
+.wiz .chips.two{grid-template-columns:1fr 1fr}
+.wiz .chip{display:flex;align-items:center;gap:12px;min-height:48px;width:100%;border:1px solid rgba(0,0,0,.15);border-radius:8px;background:#fff;padding:10px 14px;font:400 15.2px/1.3 var(--body);color:var(--ink);text-align:left}
+.wiz .chip::before{content:"";flex:none;width:20px;height:20px;border-radius:50%;border:1px solid rgba(0,0,0,.25);background:#fff}
+.wiz .multi .chip::before{border-radius:5px}
+.wiz .chip:hover{border-color:rgba(0,0,0,.35)}
+.wiz .chip[aria-pressed="true"]{background:#f1f8f5;border-color:#00704A;color:var(--ink)}
+.wiz .chip[aria-pressed="true"]::before{border-color:#00704A;background:#00704A;box-shadow:inset 0 0 0 4px #fff}
+.wiz .multi .chip[aria-pressed="true"]::before{box-shadow:none;background:#00704A url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+.wiz .chip small{color:var(--muted);font-size:12.5px}
+.wiz .tags{display:flex;flex-wrap:wrap;gap:6px}
+.wiz .tags .chip{width:auto;min-height:0;border-radius:99px;padding:6px 12px;background:#D4E9E2;border-color:#D4E9E2;font-weight:700;font-size:13.5px}
+.wiz .tags .chip::before{display:none}
+.wiz .checks{grid-template-columns:1fr;gap:8px}
+.wiz .check{border:1px solid rgba(0,0,0,.15);border-radius:8px;background:#fff;min-height:48px;align-items:center;padding:10px 14px}
+.wiz .check.on{background:#f1f8f5;border-color:#00704A}
+.wiz .check input{margin:0;width:20px;height:20px}
+.wiz .check b{font-weight:400;font-size:15.2px}
+.wiz .field input[type=number],.wiz .field input[type=text]{border:1px solid rgba(0,0,0,.15);border-radius:8px;background:#fff;min-height:48px;font-size:16px;font-weight:400;width:100%;max-width:260px}
+.wiz .field input[type=number]{font-weight:700;font-size:18px;max-width:150px}
+.wiz .money input{padding-left:26px!important}
+.wiz .inrow{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.wiz .inrow .field{flex:1 1 200px}.wiz .inrow .field input{max-width:none}
+.wnav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.wnav .btn.ghost{border-color:transparent;background:none;color:var(--muted);font-family:var(--body);padding-inline:6px}
+.rv{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.rv:first-child{border-top:1px solid var(--line)}
+.rv>span{min-width:0}
+.rv b{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.rv button{border:0;background:none;color:var(--green);font-weight:700;cursor:pointer;padding:2px 0;flex:none;font-size:13.5px}
+.wiz details.more summary{font-size:14px}
+.wrap{padding-block:24px 40px}
+@media (max-width:860px){.hero .in{grid-template-columns:1fr;padding:22px 16px 34px;gap:18px}.hero ul{display:none}.hero .lead{font-size:15.5px;margin-top:10px}.wiz{padding:20px}header.site .name{display:none}}
+@media (max-width:420px){.wiz .chips.two{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 
-<div class="brandbar"><div class="in">
-  <div>
-    <img class="logo" src="assets/logo-dark.png" alt="Connect Chiropractic" width="169" height="46">
-    <h1>Meal Plan Maker</h1>
-    <p>A week of whole-food, high-protein meals built from the flyer deals at your local stores.</p>
-  </div>
+<header class="site"><div class="in">
+  <div class="brand"><img class="logo" src="assets/logo-dark.png" alt="Connect Chiropractic" width="147" height="40"><span class="name">Meal Plan Maker</span></div>
   <div class="week"><span class="label">Flyer week</span><span class="dates" id="weekDates">Loading</span></div>
-</div></div>
+</div></header>
+
+<section class="hero" id="setup" aria-label="Set up this week"><div class="in">
+  <div class="pitch">
+    <p class="eyebrow">Meal Plan Maker · Windsor-Essex</p>
+    <h1>Plan the week around what's on sale.</h1>
+    <p class="lead">Answer a few quick questions and get a week of healthy meals built from the flyer deals at your local stores.</p>
+    <ul>
+      <li>Nutrient-dense recipes made from whole foods</li>
+      <li>High-protein meals the whole family will eat, kids included</li>
+      <li>Healthy recipes built around your budget</li>
+      <li>Eat healthier and save money at the same time</li>
+    </ul>
+  </div>
+  <div class="wiz">
+    <div class="prog"><div class="track"><i id="progBar" style="width:10%"></i></div><span id="progNum">1 / 10</span></div>
+
+    <div class="q" data-q="town"><p class="qt">Where do you live?</p>
+      <div class="chips two" id="townChips"><span class="muted">Loading towns.</span></div><span class="small muted" id="townNote"></span></div>
+
+    <div class="q" data-q="stores" hidden><p class="qt">Where are you shopping this week?</p><p class="qs">Tick every store you're happy to visit.</p>
+      <div id="storeChecks"><span class="muted">Pick your town first.</span></div></div>
+
+    <div class="q" data-q="have" hidden><p class="qt">Anything on hand you want to use?</p><p class="qs">From your fridge, freezer or pantry. The plan favours recipes that use it and leaves it off your list.</p>
+      <div class="inrow"><div class="field"><label class="label" for="haveIn">Add an item</label>
+        <input id="haveIn" type="text" list="haveList" placeholder="lamb, ground beef, venison" autocomplete="off"></div><button class="btn" id="haveAdd" type="button">Add</button></div>
+      <datalist id="haveList"></datalist><div class="chips tags" id="haveChips"></div></div>
+
+    <div class="q" data-q="budget" hidden><p class="qt">How much do you plan to spend?</p><p class="qs">For the meals in this plan, not your whole grocery bill.</p>
+      <div class="field"><label class="label" for="budget">Budget</label>
+        <div class="money"><span>$</span><input id="budget" type="number" inputmode="numeric" min="20" max="1000" step="5" value="150"></div></div></div>
+
+    <div class="q" data-q="meals" hidden><p class="qt">How many meals do you want to make?</p><p class="qs">Each one is a full recipe, usually 4 to 6 servings.</p>
+      <div class="field"><label class="label" for="meals">Recipes to cook</label>
+        <input id="meals" type="number" inputmode="numeric" min="1" max="12" step="1" value="5"></div></div>
+
+    <div class="q" data-q="types" hidden><p class="qt">What kinds of meals?</p><p class="qs">Pick as many as you like.</p>
+      <div class="chips two multi" id="typeChips"></div>
+      <span class="small muted" id="babyNote" hidden>Baby and toddler recipes come from family food blogs, not from your child's doctor. Check ages and textures before serving, and skip honey before 12 months.</span>
+      <div class="chips multi"><button class="chip" id="prepOnly" aria-pressed="false">Only recipes that reheat well</button></div></div>
+
+    <div class="q" data-q="diet" hidden><p class="qt">Are you following an eating style?</p>
+      <div class="chips" id="dietChips"></div>
+      <span class="small muted" id="dietNote" hidden>Matched from each recipe's main ingredients, so check the full recipe before you cook.</span></div>
+
+    <div class="q" data-q="protein" hidden><p class="qt">What should meals be built around?</p><p class="qs">Untick anything you don't want this week.</p>
+      <div class="chips two multi" id="proteinChips"></div></div>
+
+    <div class="q" data-q="avoid" hidden><p class="qt">Any allergies or foods to avoid?</p><p class="qs">Skip this if there are none.</p>
+      <div class="chips two multi" id="algChips"></div>
+      <div class="inrow"><div class="field"><label class="label" for="avoidIn">Other foods to leave out</label>
+        <input id="avoidIn" type="text" placeholder="mushrooms, pork, cilantro" autocomplete="off"></div><button class="btn" id="avoidAdd" type="button">Add</button></div>
+      <div class="chips tags" id="avoidChips"></div>
+      <p class="flag" style="margin:0">This filter is a helper, not a safety check. It only sees each recipe's main ingredients, so sauces, seasonings and packaged foods can still contain what you avoid. Always read the full recipe and the labels.</p></div>
+
+    <div class="q" data-q="review" hidden><p class="qt">Ready to build your week?</p>
+      <div id="reviewList"></div>
+      <details class="more" id="more">
+        <summary>Advanced settings</summary>
+        <div class="field" style="margin-top:12px"><span class="label">Recipe sites to pull from</span><div class="chips two multi" id="siteChips"></div></div>
+        <div class="row">
+          <div class="field"><label class="label" for="minProtein">Min protein per serving (g)</label><input id="minProtein" type="number" min="0" max="80" step="5" value="0"></div>
+          <div class="field"><label class="label" for="protAllow">Meat with no price, $ per serving</label><input id="protAllow" type="number" min="0" max="20" step="0.5" value="4"></div>
+          <div class="field"><label class="label" for="otherAllow">Other item with no price, $ each</label><input id="otherAllow" type="number" min="0" max="20" step="0.5" value="3"></div>
+        </div>
+        <p class="small muted" style="margin:10px 0 0">Costs are estimates. Sale items use the flyer price. Items not on sale use the regular online price at Zehrs as a guide. Meat is figured at about 0.4 lb per serving, whole birds and roasts at their smallest size. Staples like garlic, oil, herbs and spices are assumed to be in the kitchen.</p>
+      </details>
+      <button class="btn primary" id="build" disabled>Build my week</button>
+      <span class="small muted" id="setupHint">Loading deals and recipes.</span></div>
+
+    <div class="wnav"><button class="btn ghost" id="wBack" type="button" hidden>Back</button><span></span>
+      <span class="rowacts"><button class="btn ghost" id="cancelSetup" hidden>Back to my plan</button><button class="btn primary" id="wNext" type="button">Continue</button></span></div>
+  </div>
+</div></section>
 
 <div class="wrap">
   <div class="banner" id="stale" hidden></div>
-
-  <section class="setup" id="setup" aria-label="Set up this week">
-    <ol class="steps">
-      <li><h2>Where do you live?</h2>
-        <div class="body"><div class="chips" id="townChips"><span class="muted">Loading towns.</span></div><span class="small muted" id="townNote"></span></div></li>
-      <li><h2>Where are you shopping this week?</h2>
-        <div class="body"><div id="storeChecks"><span class="muted">Pick your town first.</span></div></div></li>
-      <li><h2>Anything on hand you want to use?</h2>
-        <div class="body"><div class="row"><div class="field"><label class="label" for="haveIn">From your fridge, freezer or pantry</label>
-          <input id="haveIn" type="text" list="haveList" placeholder="lamb, ground beef, venison" autocomplete="off"></div><button class="btn" id="haveAdd" type="button">Add</button></div>
-          <datalist id="haveList"></datalist><div class="chips" id="haveChips"></div>
-          <span class="small muted">The plan favours recipes that use these and leaves them off your shopping list. Tap one to remove it.</span></div></li>
-      <li><h2>How much do you plan to spend?</h2>
-        <div class="body"><div class="field"><label class="label" for="budget">Budget for these meals</label>
-          <div class="money"><span>$</span><input id="budget" type="number" min="20" max="1000" step="5" value="150"></div></div></div></li>
-      <li><h2>How many meals do you want to make?</h2>
-        <div class="body"><div class="field"><label class="label" for="meals">Recipes to cook</label>
-          <input id="meals" type="number" min="1" max="12" step="1" value="5"></div>
-          <span class="small muted">Each one is a full recipe, usually 4 to 6 servings.</span></div></li>
-      <li><h2>What kinds of recipes?</h2>
-        <div class="body">
-          <div class="field"><span class="label">Meal types</span><div class="chips" id="typeChips"></div><span class="small muted" id="babyNote" hidden>Baby and toddler recipes come from family food blogs, not from your child's doctor. Check ages and textures before serving, and skip honey before 12 months.</span></div>
-          <div class="field"><span class="label">Eating style</span><div class="chips" id="dietChips"></div><span class="small muted" id="dietNote" hidden>Matched from each recipe's main ingredients, so check the full recipe before you cook.</span></div>
-          <div class="field"><span class="label">Built around</span><div class="chips" id="proteinChips"></div></div>
-          <div class="field"><span class="label">Leftovers</span><div class="chips"><button class="chip" id="prepOnly" aria-pressed="false">Only recipes that reheat well</button></div></div>
-        </div></li>
-    </ol>
-    <details class="more" id="more">
-      <summary>Advanced settings: allergies, recipe sites, cost assumptions</summary>
-      <div class="row"><div class="field" style="flex:1 1 100%"><span class="label">Allergies and foods to avoid</span><div class="chips" id="algChips"></div></div></div>
-      <div class="row"><div class="field"><label class="label" for="avoidIn">Other foods to leave out</label>
-        <input id="avoidIn" type="text" placeholder="mushrooms, pork, cilantro" autocomplete="off"></div><button class="btn" id="avoidAdd" type="button">Add</button></div>
-      <div class="chips" id="avoidChips" style="margin-top:8px"></div>
-      <p class="flag" style="margin:8px 0 0;max-width:70ch">This filter is a helper, not a safety check. It only sees each recipe's main ingredients, so sauces, seasonings and packaged foods can still contain what you avoid. Always read the full recipe and the labels.</p>
-      <div class="row"><div class="field" style="flex:1 1 100%"><span class="label">Recipe sites to pull from</span><div class="chips" id="siteChips"></div></div></div>
-      <div class="row">
-        <div class="field"><label class="label" for="minProtein">Min protein per serving (g)</label><input id="minProtein" type="number" min="0" max="80" step="5" value="0"></div>
-        <div class="field"><label class="label" for="protAllow">Meat with no price found, $ per serving</label><input id="protAllow" type="number" min="0" max="20" step="0.5" value="4"></div>
-        <div class="field"><label class="label" for="otherAllow">Other item with no price found, $ each</label><input id="otherAllow" type="number" min="0" max="20" step="0.5" value="3"></div>
-      </div>
-      <p class="small muted" style="margin:10px 0 0;max-width:70ch">Costs are estimates. Sale items use the flyer price. Items not on sale use the regular online price at Zehrs as a guide. Meat is figured at about 0.4 lb per serving, whole birds and roasts at their smallest size. Staples like garlic, oil, herbs and spices are assumed to be in the kitchen.</p>
-    </details>
-    <div class="rowacts">
-      <button class="btn primary" id="build" disabled>Build my week</button>
-      <button class="btn" id="cancelSetup" hidden>Back to the plan</button>
-      <span class="small muted" id="setupHint">Loading deals and recipes.</span>
-    </div>
-  </section>
 
   <div class="stack20" id="results" hidden>
     <div class="planbar"><span class="what" id="planWhat"></span>
@@ -231,6 +322,7 @@ footer b{color:var(--ink);font-family:var(--display);font-weight:500;letter-spac
   <b>Connect Chiropractic · Life's Better Connected</b>
   <span>1775 Sprucewood Ave., LaSalle, Ontario · <span class="num">519.966.7222</span> · <a href="https://connectchiropractic.com" target="_blank" rel="noopener">connectchiropractic.com</a></span>
   <span id="footNote">Prices come from public store flyers and are estimates. Check the shelf price before you buy. Recipes link to the sites that wrote them.</span>
+  <span>Background photo by THLT LCX on Unsplash.</span>
 </footer>
 
 <script>
@@ -260,6 +352,7 @@ var D=null,stores=[],towns=[],recipes=[],sites=[],REG={},regMeta=null,MEAT={},DE
 var S={town:null,budget:150,meals:5,stores:{},sites:null,types:{dinner:true,soup:true,lunch:true,salad:false,breakfast:false,side:false,baby:false},proteins:{game:false},prepOnly:false,minProtein:0,protAllow:4,otherAllow:3,onhand:[],diet:"any",scale:{},alg:{},avoid:[]};
 var GAME={};
 var picks=[],locked=[],checked=[],seed=0,editing=false,notesOpen=false;
+var QS=["town","stores","have","budget","meals","types","diet","protein","avoid","review"],step=0;
 
 /* ---------- costing ---------- */
 function activeStores(){return stores.filter(function(s){return S.stores[s.id]===true})}
@@ -391,7 +484,6 @@ function renderControls(){
   chipRow($("typeChips"),TYPES,function(k){return !!S.types[k]},function(k){S.types[k]=!S.types[k]});
   chipRow($("algChips"),ALGS.map(function(k){return [k,k.charAt(0).toUpperCase()+k.slice(1)]}),function(k){return !!S.alg[k]},function(k){S.alg[k]=!S.alg[k]});
   $("avoidChips").innerHTML=S.avoid.map(function(x){return '<button class="chip" aria-pressed="true" data-k="'+esc(x)+'" title="Remove">'+esc(x)+' <small>✕</small></button>'}).join("");
-  if(ALGS.some(function(k){return S.alg[k]})||S.avoid.length)$("more").open=true;
   chipRow($("dietChips"),DIETS,function(k){return (S.diet||"any")===k},function(k){S.diet=k});
   $("haveChips").innerHTML=S.onhand.map(function(x){var n=recipes.filter(function(r){return (r.tags||[]).some(function(t){return t&&matchHave(t,x)})}).length;return '<button class="chip" aria-pressed="true" data-k="'+esc(x)+'" title="Remove">'+esc(x)+' <small>'+(n?n+" recipes":"no recipes use this")+' ✕</small></button>'}).join("");
   chipRow($("proteinChips"),PROT,function(k){return !S.proteins||S.proteins[k]!==false},function(k){S.proteins=S.proteins||{};S.proteins[k]=(S.proteins[k]===false)});
@@ -402,7 +494,32 @@ function renderControls(){
   else hint=n+" recipes match your choices.";
   $("setupHint").textContent=hint;$("build").disabled=!(t&&any&&n);
   $("cancelSetup").hidden=!picks.length;
+  showStep();
 }
+function names(list,map){return list.length?list.join(", "):"None"}
+function renderReview(){var t=townObj(),rows=[
+  ["town","Town",t?t.name:"Not picked"],
+  ["stores","Stores",names(activeStores().map(function(s){return s.name}))],
+  ["have","On hand",names(S.onhand)],
+  ["budget","Budget",money(S.budget).replace(".00","")],
+  ["meals","Meals",S.meals+(S.meals===1?" recipe":" recipes")],
+  ["types","Meal types",names(TYPES.filter(function(x){return S.types[x[0]]}).map(function(x){return x[1]}))+(S.prepOnly?", reheats well only":"")],
+  ["diet","Eating style",(DIETS.filter(function(x){return x[0]===(S.diet||"any")})[0]||DIETS[0])[1]],
+  ["protein","Built around",(function(){var off=PROT.filter(function(x){return S.proteins&&S.proteins[x[0]]===false}).map(function(x){return x[1]});return off.length?"Everything except "+off.join(", "):"Everything"})()],
+  ["avoid","Avoiding",names(ALGS.filter(function(k){return S.alg[k]}).concat(S.avoid))]];
+  $("reviewList").innerHTML=rows.map(function(r){return '<div class="rv"><span><b>'+esc(r[1])+'</b>'+esc(r[2])+'</span><button type="button" data-go="'+r[0]+'">Edit</button></div>'}).join("")}
+function showStep(){
+  if(step<0)step=0;if(step>QS.length-1)step=QS.length-1;
+  var key=QS[step];
+  Array.prototype.forEach.call(document.querySelectorAll(".wiz .q"),function(el){el.hidden=el.getAttribute("data-q")!==key});
+  $("progBar").style.width=Math.round((step+1)/QS.length*100)+"%";$("progNum").textContent=(step+1)+" / "+QS.length;
+  $("wBack").hidden=step===0;$("wNext").hidden=key==="review";
+  var ok=true;if(key==="town")ok=!!townObj();if(key==="stores")ok=activeStores().length>0;if(key==="types")ok=TYPES.some(function(x){return S.types[x[0]]});
+  $("wNext").disabled=!ok||!loaded;
+  $("wNext").textContent=(key==="have"&&!S.onhand.length)||(key==="avoid"&&!S.avoid.length&&!ALGS.some(function(k){return S.alg[k]}))?"Skip":"Continue";
+  if(key==="review")renderReview();
+}
+function go(n){step=n;renderControls();var w=document.querySelector(".wiz");if(w&&w.getBoundingClientRect().top<0)w.scrollIntoView({block:"start"})}
 function showView(){var setup=editing||!picks.length;$("setup").hidden=!setup;$("results").hidden=setup}
 function renderHeader(){
   var g=activeStores().filter(function(s){return s.validFrom});if(!g.length)g=stores.filter(function(s){return s.validFrom});
@@ -532,9 +649,14 @@ $("avoidAdd").onclick=addAvoid;$("avoidIn").addEventListener("keydown",function(
 $("avoidChips").onclick=function(e){var b=e.target.closest(".chip");if(!b)return;var k=b.getAttribute("data-k");S.avoid=S.avoid.filter(function(x){return x!==k});renderControls()};
 $("prepOnly").onclick=function(){S.prepOnly=!S.prepOnly;renderControls()};
 $("storeChecks").addEventListener("change",function(e){var c=e.target;if(!c.matches("input[type=checkbox]"))return;S.stores[c.getAttribute("data-k")]=c.checked;renderControls()});
-$("build").onclick=function(){editing=false;locked=[];checked=[];notesOpen=false;changed(true);showTab("plan");window.scrollTo(0,0)};
+$("build").onclick=function(){editing=false;step=0;locked=[];checked=[];notesOpen=false;changed(true);showTab("plan");window.scrollTo(0,0)};
 $("cancelSetup").onclick=function(){editing=false;renderAll()};
-$("editSetup").onclick=function(){editing=true;renderAll();window.scrollTo(0,0)};
+$("editSetup").onclick=function(){editing=true;step=QS.length-1;renderAll();window.scrollTo(0,0)};
+$("wNext").onclick=function(){go(step+1)};$("wBack").onclick=function(){go(step-1)};
+$("townChips").addEventListener("click",function(e){if(e.target.closest(".chip"))setTimeout(function(){if(townObj()&&QS[step]==="town")go(1)},180)});
+$("dietChips").addEventListener("click",function(e){if(e.target.closest(".chip"))setTimeout(function(){if(QS[step]==="diet")go(step+1)},180)});
+$("reviewList").addEventListener("click",function(e){var b=e.target.closest("button[data-go]");if(b)go(QS.indexOf(b.getAttribute("data-go")))});
+["budget","meals"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();this.blur();go(step+1)}})});
 $("shuffle").onclick=function(){changed(true,true)};
 $("mealsGrid").onclick=function(e){var b=e.target.closest("button[data-act]");if(!b)return;var u=b.getAttribute("data-u"),act=b.getAttribute("data-act"),i;
   if(act==="less"||act==="more"){var rr=pickedRecipes().filter(function(x){return x.url===u})[0];if(!rr)return;S.scale[u]=Math.max(1,Math.min(30,servOf(rr)+(act==="more"?1:-1)));changed(false);return}
