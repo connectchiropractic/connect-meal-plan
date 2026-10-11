@@ -188,6 +188,8 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
 .prog{display:flex;align-items:center;gap:12px}
 .prog .track{flex:1;height:6px;border-radius:99px;background:rgba(0,0,0,.1);overflow:hidden}
 .prog i{display:block;height:100%;background:#00704A;border-radius:99px;transition:width .2s}
+.restart{border:0;background:none;padding:4px 0 4px 4px;cursor:pointer;font:700 12px var(--body);color:#00704A;white-space:nowrap}
+.restart:hover{text-decoration:underline}
 .prog span{font-size:12px;font-weight:700;color:rgba(0,0,0,.45);font-variant-numeric:tabular-nums}
 .q{display:flex;flex-direction:column;gap:12px;min-width:0}
 .qt{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.25;letter-spacing:-.02em;color:var(--head);margin:0}
@@ -260,7 +262,7 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
     </ul>
   </div>
   <div class="wiz">
-    <div class="prog"><div class="track"><i id="progBar" style="width:10%"></i></div><span id="progNum">1 / 10</span></div>
+    <div class="prog"><div class="track"><i id="progBar" style="width:10%"></i></div><span id="progNum">1 / 10</span><button type="button" id="wRestart" class="restart" hidden>↺ Start over</button></div>
 
     <div class="q" data-q="town"><p class="qt">Where do you live?</p>
       <div class="chips two" id="townChips"><span class="muted">Loading towns.</span></div><span class="small muted" id="townNote"></span></div>
@@ -388,7 +390,7 @@ var D=null,stores=[],towns=[],recipes=[],sites=[],REG={},regMeta=null,MEAT={},DE
 var S={town:null,budget:150,meals:5,stores:{},sites:null,types:{dinner:true,soup:true,lunch:true,salad:false,breakfast:false,side:false,baby:false},proteins:{game:false},prepOnly:false,minProtein:0,protAllow:4,otherAllow:3,onhand:[],diet:"any",scale:{},alg:{},avoid:[]};
 var GAME={};
 var picks=[],locked=[],checked=[],seed=0,editing=false,notesOpen=false;
-var QS=["town","stores","have","budget","meals","types","diet","protein","avoid","review"],step=0;
+var S0=JSON.stringify(S);var QS=["town","stores","have","budget","meals","types","diet","protein","avoid","review"],step=0;
 
 /* ---------- costing ---------- */
 function activeStores(){return stores.filter(function(s){return S.stores[s.id]===true})}
@@ -555,7 +557,7 @@ function showStep(){
   var key=QS[step];
   Array.prototype.forEach.call(document.querySelectorAll(".wiz .q"),function(el){el.hidden=el.getAttribute("data-q")!==key});
   $("progBar").style.width=Math.round((step+1)/QS.length*100)+"%";$("progNum").textContent=(step+1)+" / "+QS.length;
-  $("wBack").hidden=step===0;$("wNext").hidden=key==="review";
+  $("wBack").hidden=step===0;$("wRestart").hidden=step===0;$("wNext").hidden=key==="review";
   var ok=true;if(key==="town")ok=!!townObj();if(key==="stores")ok=activeStores().length>0;if(key==="types")ok=TYPES.some(function(x){return S.types[x[0]]});
   $("wNext").disabled=!ok||!loaded;
   $("wNext").textContent=(key==="have"&&!S.onhand.length)||(key==="avoid"&&!S.avoid.length&&!ALGS.some(function(k){return S.alg[k]}))?"Skip":"Continue";
@@ -698,7 +700,7 @@ $("storeChecks").addEventListener("change",function(e){var c=e.target;if(!c.matc
 $("build").onclick=function(){editing=false;step=0;locked=[];checked=[];notesOpen=false;changed(true);showTab("plan");window.scrollTo(0,0)};
 $("cancelSetup").onclick=function(){editing=false;renderAll()};
 $("editSetup").onclick=function(){editing=true;step=QS.length-1;renderAll();window.scrollTo(0,0)};
-$("wNext").onclick=function(){go(step+1)};$("wBack").onclick=function(){go(step-1)};
+$("wRestart").onclick=function(){S=JSON.parse(S0);save();go(0)};$("wNext").onclick=function(){go(step+1)};$("wBack").onclick=function(){go(step-1)};
 $("townChips").addEventListener("click",function(e){if(e.target.closest(".chip"))setTimeout(function(){if(townObj()&&QS[step]==="town")go(1)},180)});
 $("dietChips").addEventListener("click",function(e){if(e.target.closest(".chip"))setTimeout(function(){if(QS[step]==="diet"&&S.diet!=="veg")go(step+1)},180)});
 $("reviewList").addEventListener("click",function(e){var b=e.target.closest("button[data-go]");if(b)go(QS.indexOf(b.getAttribute("data-go")))});
