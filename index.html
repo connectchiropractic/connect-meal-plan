@@ -313,7 +313,9 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
       <p class="vegnote" id="vegNote" hidden><b>Heads up:</b> plants make a great side dish, but they aren't the most nutrient-dense sources. Make sure you're getting enough protein.</p></div>
 
     <div class="q" data-q="protein" hidden><p class="qt">What should meals be built around?</p><p class="qs">Untick anything you don't want this week.</p>
-      <div class="chips two multi" id="proteinChips"></div></div>
+      <div class="chips two multi" id="proteinChips"></div>
+      <div id="gameBox" hidden><p class="qt" style="margin-top:18px;font-size:17px">What wild game do you have?</p><p class="qs">Tick what's in your freezer. Leave them all blank for any game.</p>
+        <div class="chips two multi" id="gameChips"></div></div></div>
 
     <div class="q" data-q="avoid" hidden><p class="qt">Any allergies or foods to avoid?</p><p class="qs">Skip this if there are none.</p>
       <div class="chips two multi" id="algChips"></div>
@@ -391,7 +393,11 @@ function money(n){return "$"+(Math.round(n*100)/100).toFixed(2)}
 function safeUrl(u){return /^https?:\/\//i.test(u||"")?u:"#"}
 var PRODUCE_LB={"butternut squash":2.5,"acorn squash":2.5,"spaghetti squash":3,"cabbage":2.5,"red cabbage":2,"sweet potatoes":2,"apples":1,"green beans":1,"tomatoes":1,"peppers":1,"parsnip":1,"asparagus":1,"pear":1,"delicata squash":2,"napa cabbage":2.5,"grapes":1,"orange":1,"brussels sprouts":1,"broccoli":1};
 var TYPES=[["dinner","Dinners"],["soup","Soups"],["salad","Salads"],["lunch","Lunches"],["breakfast","Breakfasts"],["side","Sides"],["baby","Baby and toddler"]];
-var PROT=[["chicken","Chicken"],["turkey","Turkey"],["beef","Beef"],["pork","Pork"],["lamb","Lamb"],["salmon","Salmon"],["fish","Fish"],["shrimp","Shrimp"],["eggs","Eggs"],["ham","Ham"],["game","Wild game"]];var PROTALL=PROT.concat([["vegetarian","Vegetarian"]]);
+var PROT=[["chicken","Chicken"],["turkey","Turkey"],["beef","Beef"],["pork","Pork"],["lamb","Lamb"],["salmon","Salmon"],["fish","Fish"],["shrimp","Shrimp"],["eggs","Eggs"],["ham","Ham"],["game","Wild game"]];var GTYPES=[["venison","Venison, elk or moose"],["duck","Duck"],["goose","Goose"],["turkey","Wild turkey"],["pheasant","Pheasant or grouse"],["rabbit","Rabbit"],["fish","Walleye or perch"]];
+function gType(t){return /venison/.test(t)?"venison":t==="wild duck"?"duck":t==="wild goose"?"goose":t==="wild turkey"?"turkey":(t==="pheasant"||t==="grouse")?"pheasant":t==="rabbit"?"rabbit":"fish"}
+function gSel(){return GTYPES.filter(function(x){return S.gameTypes&&S.gameTypes[x[0]]}).map(function(x){return x[0]})}
+function gOK(t){var g=gSel();return !g.length||g.indexOf(gType(t))>=0}
+var PROTALL=PROT.concat([["vegetarian","Vegetarian"]]);
 var ALGS=["gluten","dairy","eggs","peanuts","tree nuts","soy","fish","shellfish","sesame"];
 var DIETS=[["any","No preference"],["keto","Keto"],["paleo","Paleo"],["animal","Animal-based"],["med","Mediterranean"],["veg","Vegetarian"]];
 var DEPTS=["Produce","Meat & seafood","Dairy & eggs","Pantry","Frozen"];
@@ -406,7 +412,7 @@ var ARTBY={chicken:"poultry",turkey:"poultry",beef:"meat",pork:"meat",lamb:"meat
 function art(r){return '<span class="pic" aria-hidden="true"><svg viewBox="0 0 24 24">'+ART[ARTBY[r.protein]||"plant"]+'</svg></span>'}
 
 var D=null,stores=[],towns=[],recipes=[],sites=[],REG={},regMeta=null,MEAT={},DEPT={},loaded=false;
-var S={town:null,budget:150,meals:5,stores:{},sites:null,types:{dinner:true,soup:true,lunch:true,salad:false,breakfast:false,side:false,baby:false},proteins:{game:false},prepOnly:false,minProtein:0,protAllow:4,otherAllow:3,onhand:[],diet:"any",scale:{},alg:{},avoid:[]};
+var S={town:null,budget:150,meals:5,stores:{},sites:null,types:{dinner:true,soup:true,lunch:true,salad:false,breakfast:false,side:false,baby:false},proteins:{game:false},prepOnly:false,minProtein:0,protAllow:4,otherAllow:3,onhand:[],diet:"any",gameTypes:{},scale:{},alg:{},avoid:[]};
 var GAME={};
 var picks=[],locked=[],checked=[],seed=0,editing=false,notesOpen=false;
 var S0=JSON.stringify(S);var QS=["town","stores","have","budget","meals","types","diet","protein","avoid","review"],step=0;
@@ -437,7 +443,7 @@ function avoidHits(r){var out=[];ALGS.forEach(function(k){if(S.alg[k]&&(r.alg||[
   S.avoid.forEach(function(x){var words=(SYN[x]||SYN[sing(x)]||[x]),hit=r.protein===sing(x)||r.protein===x;words.forEach(function(w){if(t.indexOf(" "+sing(w)+" ")>=0)hit=true});if(hit)out.push(x)});return out}
 var SYN={pork:["pork","ham","bacon","sausage","prosciutto","pancetta","chorizo","kolbassa"],beef:["beef","steak","brisket","veal","oxtail"],nut:["almond","walnut","pecan","cashew","pistachio","hazelnut","peanut","pine nut","nut"],seafood:["shrimp","crab","lobster","clam","mussel","scallop","salmon","tuna","cod","fish","walleye","perch"],chicken:["chicken"],lamb:["lamb"],onion:["onion","shallot","leek"],tomato:["tomato","passata","marinara","salsa"],pepper:["pepper","jalapeno","poblano","chile"]};
 function haveTerms(r){return S.onhand.filter(function(x){return (r.tags||[]).some(function(t){return t&&MEAT[t]&&matchHave(t,x)})})}
-function haveTag(t){if(GAME[t])return "game";for(var i=0;i<S.onhand.length;i++)if(matchHave(t,S.onhand[i]))return "user";return ""}
+function haveTag(t){if(GAME[t]&&gOK(t))return "game";for(var i=0;i<S.onhand.length;i++)if(matchHave(t,S.onhand[i]))return "user";return ""}
 function regStore(){if(!regMeta)return null;var a=activeStores();for(var i=0;i<a.length;i++)if(a[i].id===regMeta.storeId)return a[i];return null}
 function analyse(list,idx){
   idx=idx||dealIndex();
@@ -472,7 +478,7 @@ function candidates(){return recipes.filter(function(r){
   if(S.sites&&S.sites[r.site]===false)return false;
   if(!S.types[r.meal])return false;
   if(S.diet==="veg"){if(r.protein!=="vegetarian"&&r.protein!=="eggs")return false}
-  else{if(r.protein==="vegetarian"&&(r.meal==="dinner"||r.meal==="lunch"))return false;if(S.proteins&&S.proteins[r.protein]===false)return false}
+  else{if(r.protein==="vegetarian"&&(r.meal==="dinner"||r.meal==="lunch"))return false;if(S.proteins&&S.proteins[r.protein]===false)return false;if(r.protein==="game"&&gSel().length){var gt=(r.tags||[]).filter(function(t){return GAME[t]});if(gt.length&&!gt.some(gOK))return false}}
   if(avoidHits(r).length)return false;
   if(S.diet&&S.diet!=="any"&&S.diet!=="veg"&&(r.diets||[]).indexOf(S.diet)<0)return false;
   if(S.prepOnly&&!r.preps)return false;
@@ -550,6 +556,7 @@ function renderControls(){
   chipRow($("dietChips"),DIETS,function(k){return (S.diet||"any")===k},function(k){S.diet=k});
   $("haveChips").innerHTML=S.onhand.map(function(x){var n=recipes.filter(function(r){return (r.tags||[]).some(function(t){return t&&matchHave(t,x)})}).length;return '<button class="chip" aria-pressed="true" data-k="'+esc(x)+'" title="Remove">'+esc(x)+' <small>'+(n?n+" recipes":"no recipes use this")+' ✕</small></button>'}).join("");
   chipRow($("proteinChips"),PROT,function(k){return !S.proteins||S.proteins[k]!==false},function(k){S.proteins=S.proteins||{};S.proteins[k]=(S.proteins[k]===false)});
+  $("gameBox").hidden=!(S.proteins&&S.proteins.game!==false);chipRow($("gameChips"),GTYPES,function(k){return !!(S.gameTypes&&S.gameTypes[k])},function(k){S.gameTypes=S.gameTypes||{};S.gameTypes[k]=!S.gameTypes[k]});
   var any=activeStores().length>0,n=candidates().length,hint;
   if(!t)hint="Start by picking your town.";
   else if(!any)hint="Pick at least one store.";
@@ -568,7 +575,7 @@ function renderReview(){var t=townObj(),rows=[
   ["meals","Meals",S.meals+(S.meals===1?" recipe":" recipes")],
   ["types","Meal types",names(TYPES.filter(function(x){return S.types[x[0]]}).map(function(x){return x[1]}))+(S.prepOnly?", reheats well only":"")],
   ["diet","Eating style",(DIETS.filter(function(x){return x[0]===(S.diet||"any")})[0]||DIETS[0])[1]],
-  ["protein","Built around",(function(){if(S.diet==="veg")return "Vegetables and eggs";var off=PROT.filter(function(x){return S.proteins&&S.proteins[x[0]]===false}).map(function(x){return x[1]});return off.length?"Everything except "+off.join(", "):"Everything"})()],
+  ["protein","Built around",(function(){if(S.diet==="veg")return "Vegetables and eggs";var off=PROT.filter(function(x){return S.proteins&&S.proteins[x[0]]===false}).map(function(x){return x[1]});var gs=GTYPES.filter(function(x){return S.gameTypes&&S.gameTypes[x[0]]}).map(function(x){return x[1]});return (off.length?"Everything except "+off.join(", "):"Everything")+(S.proteins.game!==false&&gs.length?" · Game: "+gs.join(", "):"")})()],
   ["avoid","Avoiding",names(ALGS.filter(function(k){return S.alg[k]}).concat(S.avoid))]];
   $("reviewList").innerHTML=rows.map(function(r){return '<div class="rv"><span><b>'+esc(r[1])+'</b>'+esc(r[2])+'</span><button type="button" data-go="'+r[0]+'">Edit</button></div>'}).join("")}
 function showStep(){
@@ -705,7 +712,7 @@ function renderAll(){renderControls();renderHeader();if(loaded){renderPlanbar();
 /* ---------- state ---------- */
 function save(){try{localStorage.setItem(KEY,JSON.stringify({S:S,picks:picks,locked:locked,checked:checked}))}catch(e){}}
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(!d||!d.S)return;Object.keys(S).forEach(function(k){if(d.S[k]!=null)S[k]=d.S[k]});picks=d.picks||[];locked=d.locked||[];checked=d.checked||[]}catch(e){}
-  if(!S.proteins)S.proteins={};if(S.proteins.game==null)S.proteins.game=false;if(!Array.isArray(S.onhand))S.onhand=[];if(!S.scale)S.scale={};if(!S.diet)S.diet="any";delete S.proteins.vegetarian;if(!S.alg)S.alg={};if(!Array.isArray(S.avoid))S.avoid=[]}
+  if(!S.proteins)S.proteins={};if(S.proteins.game==null)S.proteins.game=false;if(!Array.isArray(S.onhand))S.onhand=[];if(!S.scale)S.scale={};if(!S.diet)S.diet="any";delete S.proteins.vegetarian;if(!S.alg)S.alg={};if(!S.gameTypes)S.gameTypes={};if(!Array.isArray(S.avoid))S.avoid=[]}
 function changed(regen,jitter){ if(regen){ if(jitter)seed=(Date.now()%4294967296); generate(!!jitter)} renderAll(); save() }
 function copyRich(html){var d=document.createElement("div"),ok=false,root=document.documentElement;d.className="cpy";d.style.cssText="position:fixed;left:-9999px;top:0;width:600px;color:#000;font:16px -apple-system,Helvetica,Arial,sans-serif;-webkit-user-select:text;user-select:text";d.innerHTML=html;root.appendChild(d);
   try{var r=document.createRange();r.selectNodeContents(d);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);ok=document.execCommand("copy");sel.removeAllRanges()}catch(e){ok=false}
