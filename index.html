@@ -188,6 +188,7 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
 .prog{display:flex;align-items:center;gap:12px}
 .prog .track{flex:1;height:6px;border-radius:99px;background:rgba(0,0,0,.1);overflow:hidden}
 .prog i{display:block;height:100%;background:#00704A;border-radius:99px;transition:width .2s}
+.cpy *{text-transform:none;letter-spacing:normal;font-family:inherit;line-height:normal;text-wrap:wrap;color:inherit}
 .restart{border:0;background:none;padding:4px 0 4px 4px;cursor:pointer;font:700 12px var(--body);color:#00704A;white-space:nowrap}
 .restart:hover{text-decoration:underline}
 .prog span{font-size:12px;font-weight:700;color:rgba(0,0,0,.45);font-variant-numeric:tabular-nums}
@@ -636,11 +637,12 @@ function buildGroups(A){
   if(A.have&&A.have.length)groups.push({id:"have",name:"Already have",have:true,sum:0,rows:A.have.map(function(h){return {dept:DEPT[h.tag]||"Pantry",hv:h,text:h.name+" (for "+uniq(h.recipes).join("; ")+")",cost:0}})});
 }
 function groupText(g){return g.name.toUpperCase()+(g.any?" (buy at any store)":g.have?" (nothing to buy)":"")+"\n"+byDept(g.rows).map(function(d){return d.dept+"\n"+d.rows.map(function(r){return "- "+r.text}).join("\n")}).join("\n")}
-function groupHtml(g){return '<p><b>'+esc(g.name.toUpperCase())+'</b>'+(g.any?" (buy at any store)":g.have?" (nothing to buy)":"")+'</p>'+byDept(g.rows).map(function(d){return '<p><b><u>'+esc(d.dept)+'</u></b></p><ul>'+d.rows.map(function(r){return '<li>'+esc(r.text)+'</li>'}).join("")+'</ul>'}).join("")}
+function listTitle(){var d=new Date();return "Grocery Shopping: Week of "+["January","February","March","April","May","June","July","August","September","October","November","December"][d.getMonth()]+" "+d.getDate()}
+function groupHtml(g){return '<h2 style="font-size:22px;font-weight:bold;margin:14px 0 4px"><b>'+esc(g.name.toUpperCase())+'</b></h2>'+(g.any?"<p>(buy at any store)</p>":g.have?"<p>(nothing to buy)</p>":"")+byDept(g.rows).map(function(d){return '<p style="margin:8px 0 2px"><b><u style="text-decoration:underline">'+esc(d.dept)+'</u></b></p><ul>'+d.rows.map(function(r){return '<li>'+esc(r.text)+'</li>'}).join("")+'</ul>'}).join("")}
 function notesHtml(list,A){var t=townObj();
-  return '<p><b>Connect Meal Plan'+(t?" · "+esc(t.name):"")+'</b><br>Flyer prices to '+esc($("weekDates").textContent.split(" to ").pop())+' · about '+money(A.total)+'</p>'+groups.map(groupHtml).join("<p><br></p>")+'<p><br></p><p><b>RECIPES</b></p><ul>'+list.map(function(r){return '<li><a href="'+esc(safeUrl(r.url))+'">'+esc(r.title)+'</a></li>'}).join("")+'</ul><p>Made with the Connect Meal Plan Maker · Connect Chiropractic</p>'}
+  return '<h1 style="font-size:26px;font-weight:bold;margin:0 0 4px"><b>'+esc(listTitle())+'</b></h1><p>Connect Meal Plan'+(t?" · "+esc(t.name):"")+'<br>Flyer prices to '+esc($("weekDates").textContent.split(" to ").pop())+' · about '+money(A.total)+'</p>'+groups.map(groupHtml).join("")+'<h2 style="font-size:22px;font-weight:bold;margin:14px 0 4px"><b>RECIPES</b></h2><ul>'+list.map(function(r){return '<li><a href="'+esc(safeUrl(r.url))+'">'+esc(r.title)+'</a></li>'}).join("")+'</ul><p>Made with the Connect Meal Plan Maker · Connect Chiropractic</p>'}
 function notesText(list,A){var t=townObj();
-  return "Connect Meal Plan"+(t?" · "+t.name:"")+"\nFlyer prices to "+$("weekDates").textContent.split(" to ").pop()+" · about "+money(A.total)+"\n\n"+groups.map(groupText).join("\n\n")+"\n\nRECIPES\n"+list.map(function(r){return "- "+r.title+"\n  "+r.url}).join("\n")+"\n\nMade with the Connect Meal Plan Maker · Connect Chiropractic"}
+  return listTitle()+"\nConnect Meal Plan"+(t?" · "+t.name:"")+"\nFlyer prices to "+$("weekDates").textContent.split(" to ").pop()+" · about "+money(A.total)+"\n\n"+groups.map(groupText).join("\n\n")+"\n\nRECIPES\n"+list.map(function(r){return "- "+r.title+"\n  "+r.url}).join("\n")+"\n\nMade with the Connect Meal Plan Maker · Connect Chiropractic"}
 var lastA=null,lastList=[];
 function renderList(A,list){
   lastA=A;lastList=list;var body=$("listBody");
@@ -684,7 +686,11 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify({S:S,picks:picks,loc
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(!d||!d.S)return;Object.keys(S).forEach(function(k){if(d.S[k]!=null)S[k]=d.S[k]});picks=d.picks||[];locked=d.locked||[];checked=d.checked||[]}catch(e){}
   if(!S.proteins)S.proteins={};if(S.proteins.game==null)S.proteins.game=false;if(!Array.isArray(S.onhand))S.onhand=[];if(!S.scale)S.scale={};if(!S.diet)S.diet="any";delete S.proteins.vegetarian;if(!S.alg)S.alg={};if(!Array.isArray(S.avoid))S.avoid=[]}
 function changed(regen,jitter){ if(regen){ if(jitter)seed=(Date.now()%4294967296); generate(!!jitter)} renderAll(); save() }
-function copyText(txt,btn,fallback,html){function ok(){btn.textContent="Copied"}function plain(){try{navigator.clipboard.writeText(txt).then(ok,fallback)}catch(err){fallback()}}
+function copyRich(html){var d=document.createElement("div"),ok=false,root=document.documentElement;d.className="cpy";d.style.cssText="position:fixed;left:-9999px;top:0;width:600px;color:#000;font:16px -apple-system,Helvetica,Arial,sans-serif;-webkit-user-select:text;user-select:text";d.innerHTML=html;root.appendChild(d);
+  try{var r=document.createRange();r.selectNodeContents(d);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);ok=document.execCommand("copy");sel.removeAllRanges()}catch(e){ok=false}
+  root.removeChild(d);return ok}
+function copyText(txt,btn,fallback,html){function ok(){btn.textContent="Copied"}
+  if(html&&copyRich(html)){ok();return}function plain(){try{navigator.clipboard.writeText(txt).then(ok,fallback)}catch(err){fallback()}}
   if(html&&window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){try{navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([txt],{type:"text/plain"})})]).then(ok,plain)}catch(err){plain()}}else plain()}
 
 function num(id,key,lo,hi){$(id).addEventListener("change",function(){var v=parseFloat(this.value);if(isNaN(v))v=S[key];S[key]=Math.max(lo,Math.min(hi,v));renderControls()})}
