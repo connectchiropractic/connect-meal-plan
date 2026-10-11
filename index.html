@@ -156,6 +156,7 @@ header.site .name{font-family:var(--display);font-weight:700;color:var(--head);l
 header.site .hright{display:flex;align-items:center;gap:18px}
 .addph{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#00704A;background:#fff;border:1.5px solid #00704A;border-radius:6px;padding:8px 12px;cursor:pointer;white-space:nowrap}
 .addph:hover{background:#00704A;color:#fff}
+.vegnote{margin:14px 0 0;padding:12px 14px;background:#D4E9E2;border-left:4px solid #00704A;border-radius:6px;font-size:14.5px;line-height:1.45;color:#1E3932}
 #addPhone{border:0;border-radius:14px;padding:26px 24px 22px;width:min(420px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.3);color:#13201C;font-family:Lato,sans-serif}
 #addPhone::backdrop{background:rgba(15,36,30,.6)}
 #addPhone h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0 0 4px;color:#1E3932}
@@ -284,7 +285,8 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
 
     <div class="q" data-q="diet" hidden><p class="qt">Are you following an eating style?</p>
       <div class="chips" id="dietChips"></div>
-      <span class="small muted" id="dietNote" hidden>Matched from each recipe's main ingredients, so check the full recipe before you cook.</span></div>
+      <span class="small muted" id="dietNote" hidden>Matched from each recipe's main ingredients, so check the full recipe before you cook.</span>
+      <p class="vegnote" id="vegNote" hidden><b>Brave choice.</b> Plants make a great side dish, but they aren't the most nutrient-dense way to eat. We'll build your week meat-free anyway. The steak will be waiting when you come back. 🥩</p></div>
 
     <div class="q" data-q="protein" hidden><p class="qt">What should meals be built around?</p><p class="qs">Untick anything you don't want this week.</p>
       <div class="chips two multi" id="proteinChips"></div></div>
@@ -362,9 +364,9 @@ function money(n){return "$"+(Math.round(n*100)/100).toFixed(2)}
 function safeUrl(u){return /^https?:\/\//i.test(u||"")?u:"#"}
 var PRODUCE_LB={"butternut squash":2.5,"acorn squash":2.5,"spaghetti squash":3,"cabbage":2.5,"red cabbage":2,"sweet potatoes":2,"apples":1,"green beans":1,"tomatoes":1,"peppers":1,"parsnip":1,"asparagus":1,"pear":1,"delicata squash":2,"napa cabbage":2.5,"grapes":1,"orange":1,"brussels sprouts":1,"broccoli":1};
 var TYPES=[["dinner","Dinners"],["soup","Soups"],["salad","Salads"],["lunch","Lunches"],["breakfast","Breakfasts"],["side","Sides"],["baby","Baby and toddler"]];
-var PROT=[["chicken","Chicken"],["turkey","Turkey"],["beef","Beef"],["pork","Pork"],["lamb","Lamb"],["salmon","Salmon"],["fish","Fish"],["shrimp","Shrimp"],["eggs","Eggs"],["ham","Ham"],["game","Wild game"],["vegetarian","Vegetarian"]];
+var PROT=[["chicken","Chicken"],["turkey","Turkey"],["beef","Beef"],["pork","Pork"],["lamb","Lamb"],["salmon","Salmon"],["fish","Fish"],["shrimp","Shrimp"],["eggs","Eggs"],["ham","Ham"],["game","Wild game"]];var PROTALL=PROT.concat([["vegetarian","Vegetarian"]]);
 var ALGS=["gluten","dairy","eggs","peanuts","tree nuts","soy","fish","shellfish","sesame"];
-var DIETS=[["any","No preference"],["keto","Keto"],["paleo","Paleo"],["animal","Animal-based"],["med","Mediterranean"]];
+var DIETS=[["any","No preference"],["keto","Keto"],["paleo","Paleo"],["animal","Animal-based"],["med","Mediterranean"],["veg","Vegetarian"]];
 var DEPTS=["Produce","Meat & seafood","Dairy & eggs","Pantry","Frozen"];
 var KEY="connect-meal-plan-v1";
 var ART={poultry:'<ellipse cx="14" cy="9" rx="5.2" ry="6.4" transform="rotate(40 14 9)"/><path d="M9.9 13.1 6.6 16.4"/><circle cx="4.9" cy="16.5" r="1.5"/><circle cx="6.5" cy="18.1" r="1.5"/>',
@@ -442,9 +444,10 @@ function rand(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296
 function candidates(){return recipes.filter(function(r){
   if(S.sites&&S.sites[r.site]===false)return false;
   if(!S.types[r.meal])return false;
-  if(S.proteins&&S.proteins[r.protein]===false)return false;
+  if(S.diet==="veg"){if(r.protein!=="vegetarian"&&r.protein!=="eggs")return false}
+  else{if(r.protein==="vegetarian"&&(r.meal==="dinner"||r.meal==="lunch"))return false;if(S.proteins&&S.proteins[r.protein]===false)return false}
   if(avoidHits(r).length)return false;
-  if(S.diet&&S.diet!=="any"&&(r.diets||[]).indexOf(S.diet)<0)return false;
+  if(S.diet&&S.diet!=="any"&&S.diet!=="veg"&&(r.diets||[]).indexOf(S.diet)<0)return false;
   if(S.prepOnly&&!r.preps)return false;
   if(S.minProtein>0&&!(r.proteinG>=S.minProtein))return false;
   return true})}
@@ -497,7 +500,7 @@ function checkCard(s){var on=S.stores[s.id]===true,n=(s.items||[]).filter(functi
   return '<label class="check'+(on?" on":"")+'"><input type="checkbox" id="st-'+esc(s.id)+'" data-k="'+esc(s.id)+'"'+(on?" checked":"")+'><span><b>'+esc(s.name)+'</b><span class="small muted">'+(s.noFlyer?"no flyer to read, so no prices":n+' priced deals, to '+esc(fmtDate(s.validTo)))+'</span></span></label>'}
 function renderControls(){
   $("budget").value=S.budget;$("meals").value=S.meals;$("minProtein").value=S.minProtein;$("protAllow").value=S.protAllow;$("otherAllow").value=S.otherAllow;
-  $("prepOnly").setAttribute("aria-pressed",S.prepOnly?"true":"false");$("babyNote").hidden=!S.types.baby;$("dietNote").hidden=!S.diet||S.diet==="any";
+  $("prepOnly").setAttribute("aria-pressed",S.prepOnly?"true":"false");$("babyNote").hidden=!S.types.baby;$("dietNote").hidden=!S.diet||S.diet==="any"||S.diet==="veg";$("vegNote").hidden=S.diet!=="veg";
   if(!loaded)return;
   chipRow($("townChips"),towns.map(function(t){return [t.id,t.name,t.sub||""]}),function(k){return S.town===k},function(k){
     if(S.town===k)return; S.town=k; var t=townObj(); S.stores={}; (t.inTown.length?t.inTown:t.near).forEach(function(id){var st=storeById(id);if(st&&!st.noFlyer)S.stores[id]=true})});
@@ -533,7 +536,7 @@ function renderReview(){var t=townObj(),rows=[
   ["meals","Meals",S.meals+(S.meals===1?" recipe":" recipes")],
   ["types","Meal types",names(TYPES.filter(function(x){return S.types[x[0]]}).map(function(x){return x[1]}))+(S.prepOnly?", reheats well only":"")],
   ["diet","Eating style",(DIETS.filter(function(x){return x[0]===(S.diet||"any")})[0]||DIETS[0])[1]],
-  ["protein","Built around",(function(){var off=PROT.filter(function(x){return S.proteins&&S.proteins[x[0]]===false}).map(function(x){return x[1]});return off.length?"Everything except "+off.join(", "):"Everything"})()],
+  ["protein","Built around",(function(){if(S.diet==="veg")return "Vegetables and eggs";var off=PROT.filter(function(x){return S.proteins&&S.proteins[x[0]]===false}).map(function(x){return x[1]});return off.length?"Everything except "+off.join(", "):"Everything"})()],
   ["avoid","Avoiding",names(ALGS.filter(function(k){return S.alg[k]}).concat(S.avoid))]];
   $("reviewList").innerHTML=rows.map(function(r){return '<div class="rv"><span><b>'+esc(r[1])+'</b>'+esc(r[2])+'</span><button type="button" data-go="'+r[0]+'">Edit</button></div>'}).join("")}
 function showStep(){
@@ -547,7 +550,7 @@ function showStep(){
   $("wNext").textContent=(key==="have"&&!S.onhand.length)||(key==="avoid"&&!S.avoid.length&&!ALGS.some(function(k){return S.alg[k]}))?"Skip":"Continue";
   if(key==="review")renderReview();
 }
-function go(n){step=n;renderControls();var w=document.querySelector(".wiz");if(w&&w.getBoundingClientRect().top<0)w.scrollIntoView({block:"start"})}
+function go(n){if(QS[n]==="protein"&&S.diet==="veg")n+=(n>step?1:-1);step=n;renderControls();var w=document.querySelector(".wiz");if(w&&w.getBoundingClientRect().top<0)w.scrollIntoView({block:"start"})}
 function showView(){var setup=editing||!picks.length;$("setup").hidden=!setup;$("results").hidden=setup}
 function renderHeader(){
   var g=activeStores().filter(function(s){return s.validFrom});if(!g.length)g=stores.filter(function(s){return s.validFrom});
@@ -663,7 +666,7 @@ function renderAll(){renderControls();renderHeader();if(loaded){renderPlanbar();
 /* ---------- state ---------- */
 function save(){try{localStorage.setItem(KEY,JSON.stringify({S:S,picks:picks,locked:locked,checked:checked}))}catch(e){}}
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(!d||!d.S)return;Object.keys(S).forEach(function(k){if(d.S[k]!=null)S[k]=d.S[k]});picks=d.picks||[];locked=d.locked||[];checked=d.checked||[]}catch(e){}
-  if(!S.proteins)S.proteins={};if(S.proteins.game==null)S.proteins.game=false;if(!Array.isArray(S.onhand))S.onhand=[];if(!S.scale)S.scale={};if(!S.diet)S.diet="any";if(!S.alg)S.alg={};if(!Array.isArray(S.avoid))S.avoid=[]}
+  if(!S.proteins)S.proteins={};if(S.proteins.game==null)S.proteins.game=false;if(!Array.isArray(S.onhand))S.onhand=[];if(!S.scale)S.scale={};if(!S.diet)S.diet="any";delete S.proteins.vegetarian;if(!S.alg)S.alg={};if(!Array.isArray(S.avoid))S.avoid=[]}
 function changed(regen,jitter){ if(regen){ if(jitter)seed=(Date.now()%4294967296); generate(!!jitter)} renderAll(); save() }
 function copyText(txt,btn,fallback){try{navigator.clipboard.writeText(txt).then(function(){btn.textContent="Copied"},fallback)}catch(err){fallback()}}
 
@@ -682,7 +685,7 @@ $("cancelSetup").onclick=function(){editing=false;renderAll()};
 $("editSetup").onclick=function(){editing=true;step=QS.length-1;renderAll();window.scrollTo(0,0)};
 $("wNext").onclick=function(){go(step+1)};$("wBack").onclick=function(){go(step-1)};
 $("townChips").addEventListener("click",function(e){if(e.target.closest(".chip"))setTimeout(function(){if(townObj()&&QS[step]==="town")go(1)},180)});
-$("dietChips").addEventListener("click",function(e){if(e.target.closest(".chip"))setTimeout(function(){if(QS[step]==="diet")go(step+1)},180)});
+$("dietChips").addEventListener("click",function(e){if(e.target.closest(".chip"))setTimeout(function(){if(QS[step]==="diet"&&S.diet!=="veg")go(step+1)},180)});
 $("reviewList").addEventListener("click",function(e){var b=e.target.closest("button[data-go]");if(b)go(QS.indexOf(b.getAttribute("data-go")))});
 ["budget","meals"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();this.blur();go(step+1)}})});
 $("shuffle").onclick=function(){changed(true,true)};
@@ -713,7 +716,7 @@ Promise.all([fetch("data/stores.json").then(function(r){return r.json()}),fetch(
   if(D.regular){regMeta=D.regular;(D.regular.items||[]).forEach(function(it){(it.tags||[]).forEach(function(t){REG[t]=it})})}
   recipes=res[1].recipes||[];var cnt={};recipes.forEach(function(r){cnt[r.site]=(cnt[r.site]||0)+1});
   sites=(res[1].sites||[]).map(function(s){return {site:s.site,n:cnt[s.site]||0}});
-  $("rprot").innerHTML='<option value="">Any protein</option>'+PROT.map(function(p){return '<option value="'+p[0]+'">'+p[1]+'</option>'}).join("");
+  $("rprot").innerHTML='<option value="">Any protein</option>'+PROTALL.map(function(p){return '<option value="'+p[0]+'">'+p[1]+'</option>'}).join("");
   $("rsite").innerHTML='<option value="">Any site</option>'+sites.map(function(s){return '<option value="'+esc(s.site)+'">'+esc(s.site)+'</option>'}).join("");
   if(S.town&&!townObj()){S.town=null;S.stores={}}
   var known={};recipes.forEach(function(r){known[r.url]=1});picks=picks.filter(function(u){return known[u]});locked=locked.filter(function(u){return known[u]});
