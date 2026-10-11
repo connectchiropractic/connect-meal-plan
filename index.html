@@ -153,6 +153,22 @@ header.site .in{max-width:1080px;margin:0 auto;padding:14px 16px;display:flex;al
 header.site .logo{height:40px;margin:0}
 header.site .brand{display:flex;align-items:center;gap:14px}
 header.site .name{font-family:var(--display);font-weight:700;color:var(--head);letter-spacing:-.01em;font-size:17px;padding-left:14px;border-left:1px solid var(--line)}
+header.site .hright{display:flex;align-items:center;gap:18px}
+.addph{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#00704A;background:#fff;border:1.5px solid #00704A;border-radius:6px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.addph:hover{background:#00704A;color:#fff}
+#addPhone{border:0;border-radius:14px;padding:26px 24px 22px;width:min(420px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.3);color:#13201C;font-family:Lato,sans-serif}
+#addPhone::backdrop{background:rgba(15,36,30,.6)}
+#addPhone h2{font-family:var(--display);font-weight:800;font-size:22px;margin:0 0 4px;color:#1E3932}
+#addPhone .apl{margin:0 0 16px;color:#4a5a55;font-size:15px}
+#addPhone .apx{position:absolute;top:10px;right:12px;border:0;background:none;font-size:26px;line-height:1;color:#4a5a55;cursor:pointer;padding:4px 8px}
+.aptabs{display:flex;gap:8px;margin-bottom:14px}
+.aptabs button{flex:1;font-family:var(--display);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.06em;padding:10px;border-radius:6px;border:1.5px solid #cfdad6;background:#fff;color:#1E3932;cursor:pointer}
+.aptabs button[aria-selected=true]{background:#00704A;border-color:#00704A;color:#fff}
+#addPhone ol{margin:0;padding-left:22px;font-size:15.5px;line-height:1.5}
+#addPhone li{margin:0 0 8px}
+#addPhone .apn{font-size:13.5px;color:#4a5a55;margin:10px 0 0}
+#addPhone .apu{margin:16px 0 0;padding:10px;background:#D4E9E2;border-radius:6px;text-align:center;font-weight:700;color:#1E3932;font-size:14px}
+@media (max-width:520px){header.site .week{display:none}}
 header.site .week{align-items:flex-end;text-align:right}
 header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15px;color:var(--head)}
 .hero{position:relative;overflow:hidden;background:#0F241E;color:#fff}
@@ -213,8 +229,19 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
 
 <header class="site"><div class="in">
   <div class="brand"><img class="logo" src="assets/logo-dark.png" alt="Connect Chiropractic" width="147" height="40"><span class="name">Meal Plan Maker</span></div>
-  <div class="week"><span class="label">Flyer week</span><span class="dates" id="weekDates">Loading</span></div>
+  <div class="hright"><button type="button" class="addph" data-addphone><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 8v6M9 11h6"/></svg>Add to your phone</button>
+  <div class="week"><span class="label">Flyer week</span><span class="dates" id="weekDates">Loading</span></div></div>
 </div></header>
+<dialog id="addPhone" aria-labelledby="apT">
+  <button type="button" class="apx" id="apClose" aria-label="Close">×</button>
+  <h2 id="apT">Add it to your phone</h2>
+  <p class="apl">It works just like an app. No download, no login.</p>
+  <div class="aptabs" role="tablist"><button type="button" role="tab" data-ap="ios" aria-selected="true">iPhone</button><button type="button" role="tab" data-ap="and" aria-selected="false">Android</button></div>
+  <ol data-apl="ios"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (the square with an arrow pointing up).</li><li>Scroll down and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b> in the top right corner.</li></ol>
+  <ol data-apl="and" hidden><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>three dots</b> in the top right corner.</li><li>Tap <b>Add to Home screen</b> (some phones say <b>Install app</b>).</li><li>Tap <b>Add</b> or <b>Install</b>.</li></ol>
+  <p class="apn" data-apl="ios">Opened this from Instagram or Facebook? Tap the three dots and choose "Open in browser" first.</p>
+  <p class="apu">mealplan.connectchiropractic.com</p>
+</dialog>
 
 <section class="hero" id="setup" aria-label="Set up this week"><div class="in">
   <div class="pitch">
@@ -322,6 +349,7 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
   <b>Connect Chiropractic · Life's Better Connected</b>
   <span>1775 Sprucewood Ave., LaSalle, Ontario · <span class="num">519.966.7222</span> · <a href="https://connectchiropractic.com" target="_blank" rel="noopener">connectchiropractic.com</a></span>
   <span id="footNote">Prices come from public store flyers and are estimates. Check the shelf price before you buy. Recipes link to the sites that wrote them.</span>
+  <span data-aphide><a href="#" data-addphone>Add this app to your phone</a></span>
   <span>Background photo by Sergey Kotenev on Unsplash.</span>
 </footer>
 
@@ -692,6 +720,15 @@ Promise.all([fetch("data/stores.json").then(function(r){return r.json()}),fetch(
   $("footNote").textContent="Prices come from public store flyers read on "+fmtDate(D.updated)+" and are estimates. Check the shelf price before you buy. Recipes link to the sites that wrote them.";
   loaded=true;renderAll();
 }).catch(fail);
+(function(){var d=document.getElementById("addPhone");if(!d)return;
+var sa=false;try{sa=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true}catch(e){}
+var os=/android/i.test(navigator.userAgent)?"and":"ios";
+function tab(k){d.querySelectorAll("[data-ap]").forEach(function(b){b.setAttribute("aria-selected",b.getAttribute("data-ap")===k?"true":"false")});d.querySelectorAll("[data-apl]").forEach(function(e){e.hidden=e.getAttribute("data-apl")!==k})}
+document.querySelectorAll("[data-addphone]").forEach(function(b){if(sa){(b.closest("[data-aphide]")||b).hidden=true;return}b.addEventListener("click",function(e){e.preventDefault();tab(os);if(d.showModal)d.showModal();else d.setAttribute("open","")})});
+d.querySelectorAll("[data-ap]").forEach(function(b){b.addEventListener("click",function(){tab(b.getAttribute("data-ap"))})});
+document.getElementById("apClose").addEventListener("click",function(){d.close()});
+d.addEventListener("click",function(e){if(e.target===d)d.close()});
+})();
 })();
 </script>
 
