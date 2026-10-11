@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Build a week of whole-food, high-protein meals from the flyer deals at your local Windsor-Essex grocery stores. From Connect Chiropractic.">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" href="assets/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meal Plan">
+<title>Connect Meal Plan Maker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Oswald:wght@500;600&display=swap">
+<style>html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>
+/* Layout: white throughout (one light theme by request), a white brand bar with the black logo, a five-question setup card, then the plan with tabs. Flyer sale prices wear a green price tag. */
+:root{
+  --bg:#ffffff; --surface:#ffffff; --ink:#1E3932; --muted:#566a60; --line:#dfe5e1; --field:#f5f8f6;
+  --green:#00704A; --green-soft:#D4E9E2; --on-green:#ffffff; --brand:#ffffff; --on-brand:#1E3932; --brand-dim:#566a60;
+  --tag:#00704A; --tag-ink:#ffffff; --warn:#96490f; --over:#b3261e;
+  --display:"Oswald","Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"DM Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.brandbar{background:var(--brand);color:var(--on-brand);border-bottom:1px solid var(--line)}
+.brandbar .in{max-width:1080px;margin:0 auto;padding:18px 16px 20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.wordmark{font-family:var(--display);font-weight:600;letter-spacing:.14em;font-size:15px;text-transform:uppercase;display:flex;gap:8px;align-items:baseline}
+.wordmark span{font-family:var(--mono);font-weight:400;letter-spacing:.12em;font-size:11px;color:var(--brand-dim)}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(30px,6vw,44px);line-height:1;text-transform:uppercase;letter-spacing:.01em;margin-top:8px}
+.brandbar p{margin:6px 0 0;color:var(--brand-dim);max-width:52ch}
+.logo{height:46px;width:auto;display:block;margin-bottom:10px}
+.mealhead{display:flex;gap:12px;align-items:flex-start}
+.mealhead>div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.pic{flex:none;width:46px;height:46px;border-radius:50%;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center}
+.pic svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.seebtn{display:block;text-align:center;text-decoration:none;border:1px solid var(--green);color:var(--green);border-radius:8px;padding:7px 12px;font-weight:600;font-size:14px}
+.seebtn:hover{background:var(--green-soft)}
+.week{display:flex;flex-direction:column;gap:2px}
+.week .dates{font-family:var(--display);font-weight:500;font-size:20px}
+.brandbar .label{color:var(--brand-dim)}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:20px 40px;display:flex;flex-direction:column;gap:20px}
+h2{font-family:var(--display);font-weight:500;font-size:21px;letter-spacing:.01em}
+h3{font-family:var(--body);font-size:16px;font-weight:600;line-height:1.25}
+a{color:var(--green)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .small{font-size:13px}
+.label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.banner{border:1px solid var(--warn);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:13.5px}
+.row{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field input[type=number]{width:110px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);font-size:17px;font-weight:600}
+.money{position:relative}.money span{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
+.money input{padding-left:22px!important}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--field);border-radius:999px;padding:6px 13px;cursor:pointer;font-size:13.5px;font-weight:500;text-align:left}
+.chip small{font-weight:400;opacity:.8}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.btn.sm{padding:4px 10px;font-size:13px;font-weight:500}
+.btn[aria-pressed="true"]{background:var(--green-soft);border-color:var(--green)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+details.more summary{cursor:pointer;color:var(--muted);font-size:13.5px}
+details.more .row{margin-top:12px} details.more input[type=number]{width:84px;font-size:15px}
+.setup{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:20px}
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:step;display:flex;flex-direction:column;gap:22px}
+ol.steps>li{counter-increment:step;display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px;align-items:start}
+ol.steps>li::before{content:counter(step);grid-row:1 / span 3;width:30px;height:30px;border-radius:50%;background:var(--green-soft);color:var(--green);font-family:var(--display);font-weight:600;display:flex;align-items:center;justify-content:center}
+ol.steps>li>*{grid-column:2}
+ol.steps h2{padding-top:2px}
+ol.steps .body{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.check{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--field)}
+.check input{margin-top:2px;width:18px;height:18px;accent-color:var(--green);flex:none}
+.check.on{border-color:var(--green);background:var(--green-soft)}
+.check b{display:block;font-weight:600}
+.planbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.planbar .what{font-weight:600;min-width:0}
+.stack20{display:flex;flex-direction:column;gap:20px}
+.rowacts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.summary>div{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.summary .big{font-family:var(--display);font-weight:500;font-size:27px;line-height:1.1}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--green)}
+.over .big,.over .state{color:var(--over)} .over .bar i{background:var(--over)}
+@media (max-width:640px){.summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs button{border:0;background:none;padding:10px 14px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--green)}
+.meals{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.meal{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.meal h3 a{color:var(--ink);text-decoration:none}.meal h3 a:hover{text-decoration:underline}
+.facts{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:600}
+.ings{display:flex;flex-wrap:wrap;gap:5px}
+.ing{font-size:12.5px;padding:2px 8px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.ing.sale{background:var(--tag);color:var(--tag-ink);border-color:var(--tag);font-weight:600}
+.ing.reg{color:var(--ink)} .ing.have{background:var(--green-soft);border-color:var(--green-soft);color:var(--ink);font-weight:600}
+.field input[type=text]{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);width:260px;max-width:100%}
+.serv{display:inline-flex;gap:6px;align-items:center}
+.serv .btn{padding:0 8px;line-height:22px;font-size:15px} .ing.pantry{border-style:dashed}
+.meal .seebtn{margin-top:auto}
+.meal .foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--line)}
+.cost{font-family:var(--display);font-weight:500;font-size:20px}
+.tag{display:inline-block;background:var(--tag);color:var(--tag-ink);font-weight:700;padding:1px 7px;border-radius:4px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.flag{color:var(--warn);font-size:12.5px;font-weight:600}
+.store{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.store>header,.store>summary{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+.store>summary{cursor:pointer;list-style:none}.store>summary::-webkit-details-marker{display:none}
+details.store:not([open])>summary{border-bottom:0}
+.store .note{padding:8px 14px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
+tr.dept th{background:var(--green-soft);color:var(--ink);padding-block:5px}
+td.r,th.r{text-align:right;white-space:nowrap}
+.list label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.list input{margin-top:3px;accent-color:var(--green);width:16px;height:16px;flex:none}
+.list tr.done td{color:var(--muted);text-decoration:line-through}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.filters input[type=search],.filters select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0;max-width:100%}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:28px 18px;text-align:center;color:var(--muted)}
+.butchers{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.butchers>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:3px}
+.notes{background:var(--surface);border:1px solid var(--green);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.copybox{width:100%;min-height:180px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--field);color:var(--ink);font:13px/1.5 var(--body)}
+footer{max-width:1080px;margin:0 auto;padding:0 16px 48px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:6px}
+footer b{color:var(--ink);font-family:var(--display);font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+
+<div class="brandbar"><div class="in">
+  <div>
+    <img class="logo" src="assets/logo-dark.png" alt="Connect Chiropractic" width="169" height="46">
+    <h1>Meal Plan Maker</h1>
+    <p>A week of whole-food, high-protein meals built from the flyer deals at your local stores.</p>
+  </div>
+  <div class="week"><span class="label">Flyer week</span><span class="dates" id="weekDates">Loading</span></div>
+</div></div>
+
+<div class="wrap">
+  <div class="banner" id="stale" hidden></div>
+
+  <section class="setup" id="setup" aria-label="Set up this week">
+    <ol class="steps">
+      <li><h2>Where do you live?</h2>
+        <div class="body"><div class="chips" id="townChips"><span class="muted">Loading towns.</span></div><span class="small muted" id="townNote"></span></div></li>
+      <li><h2>Where are you shopping this week?</h2>
+        <div class="body"><div id="storeChecks"><span class="muted">Pick your town first.</span></div></div></li>
+      <li><h2>Anything on hand you want to use?</h2>
+        <div class="body"><div class="row"><div class="field"><label class="label" for="haveIn">From your fridge, freezer or pantry</label>
+          <input id="haveIn" type="text" list="haveList" placeholder="lamb, ground beef, venison" autocomplete="off"></div><button class="btn" id="haveAdd" type="button">Add</button></div>
+          <datalist id="haveList"></datalist><div class="chips" id="haveChips"></div>
+          <span class="small muted">The plan favours recipes that use these and leaves them off your shopping list. Tap one to remove it.</span></div></li>
+      <li><h2>How much do you plan to spend?</h2>
+        <div class="body"><div class="field"><label class="label" for="budget">Budget for these meals</label>
+          <div class="money"><span>$</span><input id="budget" type="number" min="20" max="1000" step="5" value="150"></div></div></div></li>
+      <li><h2>How many meals do you want to make?</h2>
+        <div class="body"><div class="field"><label class="label" for="meals">Recipes to cook</label>
+          <input id="meals" type="number" min="1" max="12" step="1" value="5"></div>
+          <span class="small muted">Each one is a full recipe, usually 4 to 6 servings.</span></div></li>
+      <li><h2>What kinds of recipes?</h2>
+        <div class="body">
+          <div class="field"><span class="label">Meal types</span><div class="chips" id="typeChips"></div><span class="small muted" id="babyNote" hidden>Baby and toddler recipes come from family food blogs, not from your child's doctor. Check ages and textures before serving, and skip honey before 12 months.</span></div>
+          <div class="field"><span class="label">Eating style</span><div class="chips" id="dietChips"></div><span class="small muted" id="dietNote" hidden>Matched from each recipe's main ingredients, so check the full recipe before you cook.</span></div>
+          <div class="field"><span class="label">Built around</span><div class="chips" id="proteinChips"></div></div>
+          <div class="field"><span class="label">Leftovers</span><div class="chips"><button class="chip" id="prepOnly" aria-pressed="false">Only recipes that reheat well</button></div></div>
+        </div></li>
+    </ol>
+    <details class="more" id="more">
+      <summary>Advanced settings: allergies, recipe sites, cost assumptions</summary>
+      <div class="row"><div class="field" style="flex:1 1 100%"><span class="label">Allergies and foods to avoid</span><div class="chips" id="algChips"></div></div></div>
+      <div class="row"><div class="field"><label class="label" for="avoidIn">Other foods to leave out</label>
+        <input id="avoidIn" type="text" placeholder="mushrooms, pork, cilantro" autocomplete="off"></div><button class="btn" id="avoidAdd" type="button">Add</button></div>
+      <div class="chips" id="avoidChips" style="margin-top:8px"></div>
+      <p class="flag" style="margin:8px 0 0;max-width:70ch">This filter is a helper, not a safety check. It only sees each recipe's main ingredients, so sauces, seasonings and packaged foods can still contain what you avoid. Always read the full recipe and the labels.</p>
+      <div class="row"><div class="field" style="flex:1 1 100%"><span class="label">Recipe sites to pull from</span><div class="chips" id="siteChips"></div></div></div>
+      <div class="row">
+        <div class="field"><label class="label" for="minProtein">Min protein per serving (g)</label><input id="minProtein" type="number" min="0" max="80" step="5" value="0"></div>
+        <div class="field"><label class="label" for="protAllow">Meat with no price found, $ per serving</label><input id="protAllow" type="number" min="0" max="20" step="0.5" value="4"></div>
+        <div class="field"><label class="label" for="otherAllow">Other item with no price found, $ each</label><input id="otherAllow" type="number" min="0" max="20" step="0.5" value="3"></div>
+      </div>
+      <p class="small muted" style="margin:10px 0 0;max-width:70ch">Costs are estimates. Sale items use the flyer price. Items not on sale use the regular online price at Zehrs as a guide. Meat is figured at about 0.4 lb per serving, whole birds and roasts at their smallest size. Staples like garlic, oil, herbs and spices are assumed to be in the kitchen.</p>
+    </details>
+    <div class="rowacts">
+      <button class="btn primary" id="build" disabled>Build my week</button>
+      <button class="btn" id="cancelSetup" hidden>Back to the plan</button>
+      <span class="small muted" id="setupHint">Loading deals and recipes.</span>
+    </div>
+  </section>
+
+  <div class="stack20" id="results" hidden>
+    <div class="planbar"><span class="what" id="planWhat"></span>
+      <span class="rowacts"><button class="btn" id="shuffle">Shuffle recipes</button><button class="btn" id="editSetup">Change setup</button></span></div>
+    <section class="summary" id="summary" aria-label="Plan summary" hidden></section>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="plan" aria-selected="true">This week</button>
+      <button role="tab" data-tab="list" aria-selected="false">Shopping list</button>
+      <button role="tab" data-tab="deals" aria-selected="false">Flyer deals</button>
+      <button role="tab" data-tab="recipes" aria-selected="false">Recipe library</button>
+    </nav>
+    <section id="tab-plan"><div class="empty" id="planEmpty">No recipes in the plan yet.</div><div class="meals" id="mealsGrid"></div></section>
+    <section id="tab-list" hidden><div class="stack" id="listBody"></div></section>
+    <section id="tab-deals" hidden><div class="stack" id="dealsBody"></div></section>
+    <section id="tab-recipes" hidden>
+      <div class="stack">
+        <div class="filters">
+          <input type="search" id="rq" placeholder="Search recipes or ingredients" aria-label="Search recipes">
+          <select id="rprot" aria-label="Protein"><option value="">Any protein</option></select>
+          <select id="rsite" aria-label="Site"><option value="">Any site</option></select>
+          <span class="muted small" id="rcount"></span>
+        </div>
+        <div class="store scroll"><table id="rtable"></table></div>
+      </div>
+    </section>
+  </div>
+</div>
+<footer>
+  <b>Connect Chiropractic · Life's Better Connected</b>
+  <span>1775 Sprucewood Ave., LaSalle, Ontario · <span class="num">519.966.7222</span> · <a href="https://connectchiropractic.com" target="_blank" rel="noopener">connectchiropractic.com</a></span>
+  <span id="footNote">Prices come from public store flyers and are estimates. Check the shelf price before you buy. Recipes link to the sites that wrote them.</span>
+</footer>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function money(n){return "$"+(Math.round(n*100)/100).toFixed(2)}
+function safeUrl(u){return /^https?:\/\//i.test(u||"")?u:"#"}
+var PRODUCE_LB={"butternut squash":2.5,"acorn squash":2.5,"spaghetti squash":3,"cabbage":2.5,"red cabbage":2,"sweet potatoes":2,"apples":1,"green beans":1,"tomatoes":1,"peppers":1,"parsnip":1,"asparagus":1,"pear":1,"delicata squash":2,"napa cabbage":2.5,"grapes":1,"orange":1,"brussels sprouts":1,"broccoli":1};
+var TYPES=[["dinner","Dinners"],["soup","Soups"],["salad","Salads"],["lunch","Lunches"],["breakfast","Breakfasts"],["side","Sides"],["baby","Baby and toddler"]];
+var PROT=[["chicken","Chicken"],["turkey","Turkey"],["beef","Beef"],["pork","Pork"],["lamb","Lamb"],["salmon","Salmon"],["fish","Fish"],["shrimp","Shrimp"],["eggs","Eggs"],["ham","Ham"],["game","Wild game"],["vegetarian","Vegetarian"]];
+var ALGS=["gluten","dairy","eggs","peanuts","tree nuts","soy","fish","shellfish","sesame"];
+var DIETS=[["any","No preference"],["keto","Keto"],["paleo","Paleo"],["animal","Animal-based"],["med","Mediterranean"]];
+var DEPTS=["Produce","Meat & seafood","Dairy & eggs","Pantry","Frozen"];
+var KEY="connect-meal-plan-v1";
+var ART={poultry:'<ellipse cx="14" cy="9" rx="5.2" ry="6.4" transform="rotate(40 14 9)"/><path d="M9.9 13.1 6.6 16.4"/><circle cx="4.9" cy="16.5" r="1.5"/><circle cx="6.5" cy="18.1" r="1.5"/>',
+meat:'<path d="M4 12c0-4.5 4-7.5 9-7.5 4.5 0 7.5 2.5 7.5 6 0 4.5-4.5 9-10 9C6.5 19.5 4 16.5 4 12z"/><circle cx="14" cy="10.3" r="1.9"/><path d="M8 13.5c.6 1.4 1.8 2.3 3.2 2.6"/>',
+fish:'<ellipse cx="10.3" cy="12" rx="7" ry="4.4"/><path d="M17 12l4.5-3.8v7.6z"/><path d="M7.4 10.9h.01"/><path d="M11.5 9.3c1 .8 1 4.6 0 5.4"/>',
+shell:'<path d="M18.2 7.2A6.6 6.6 0 1 0 12 16.6h4.6"/><path d="M18.2 7.2h-4.4"/><path d="M8.3 7.6v4M11 6.4v5.2"/><path d="M16.6 16.6l2.6 1.9M16.6 16.6l2.9-1.2"/>',
+egg:'<path d="M12 3.5c3.6 0 6.5 5.2 6.5 9.6a6.5 6.5 0 0 1-13 0c0-4.4 2.9-9.6 6.5-9.6z"/><path d="M9 13.5a3 3 0 0 0 2.4 2.9"/>',
+plant:'<path d="M5 19C5 11 10 5 19 5c0 9-5 14-14 14z"/><path d="M5 19l9-9"/><path d="M10 14h4M10 14v-4"/>'};
+var ARTBY={chicken:"poultry",turkey:"poultry",beef:"meat",pork:"meat",lamb:"meat",ham:"meat",salmon:"fish",fish:"fish",shrimp:"shell",eggs:"egg",vegetarian:"plant",game:"meat"};
+function art(r){return '<span class="pic" aria-hidden="true"><svg viewBox="0 0 24 24">'+ART[ARTBY[r.protein]||"plant"]+'</svg></span>'}
+
+var D=null,stores=[],towns=[],recipes=[],sites=[],REG={},regMeta=null,MEAT={},DEPT={},loaded=false;
+var S={town:null,budget:150,meals:5,stores:{},sites:null,types:{dinner:true,soup:true,lunch:true,salad:false,breakfast:false,side:false,baby:false},proteins:{game:false},prepOnly:false,minProtein:0,protAllow:4,otherAllow:3,onhand:[],diet:"any",scale:{},alg:{},avoid:[]};
+var GAME={};
+var picks=[],locked=[],checked=[],seed=0,editing=false,notesOpen=false;
+
+/* ---------- costing ---------- */
+function activeStores(){return stores.filter(function(s){return S.stores[s.id]===true})}
+function dealIndex(){var idx={};activeStores().forEach(function(s){(s.items||[]).forEach(function(d){(d.tags||[]).forEach(function(t){(idx[t]=idx[t]||[]).push({store:s,deal:d})})})});return idx}
+function needLb(tag,d,serv){ if(MEAT[tag]) return serv*(d.perServLb||0.4); return PRODUCE_LB[tag]||1.5 }
+function lineCost(d,lb,count,ntags){
+  if(d.price==null) return 0;
+  if(d.unit==="lb") return Math.max(d.minLb||0,lb)*d.price;
+  if(d.packLb) return Math.max(1,Math.ceil(lb/d.packLb-0.05))*d.price;
+  if(d.shared) return d.price*(ntags||1);
+  return Math.ceil(count-1e-6)*(d.per||1)*d.price;
+}
+function bestDeal(tag,serv,idx){
+  var c=(idx[tag]||[]),best=null,bc=1e9,info=null;
+  c.forEach(function(x){ if(x.deal.price==null){info=info||x;return}
+    var k=lineCost(x.deal,needLb(tag,x.deal,serv),1,1); if(k<bc){bc=k;best=x} });
+  return {best:best,info:info};
+}
+function servOf(r){return (S.scale&&S.scale[r.url])||r.servings||4}
+function factor(r){return servOf(r)/(r.servings||4)}
+function sing(x){return String(x).toLowerCase().split(/\s+/).map(function(w){return w.replace(/s$/,"")}).join(" ")}
+function matchHave(t,x){return (" "+sing(t)+" ").indexOf(" "+sing(x)+" ")>=0}
+function avoidHits(r){var out=[];ALGS.forEach(function(k){if(S.alg[k]&&(r.alg||[]).indexOf(k)>=0)out.push(k)});
+  var t=" "+sing((r.ing||[]).join(" , ")+" , "+r.title).replace(/,/g," , ")+" ";
+  S.avoid.forEach(function(x){var words=(SYN[x]||SYN[sing(x)]||[x]),hit=r.protein===sing(x)||r.protein===x;words.forEach(function(w){if(t.indexOf(" "+sing(w)+" ")>=0)hit=true});if(hit)out.push(x)});return out}
+var SYN={pork:["pork","ham","bacon","sausage","prosciutto","pancetta","chorizo","kolbassa"],beef:["beef","steak","brisket","veal","oxtail"],nut:["almond","walnut","pecan","cashew","pistachio","hazelnut","peanut","pine nut","nut"],seafood:["shrimp","crab","lobster","clam","mussel","scallop","salmon","tuna","cod","fish","walleye","perch"],chicken:["chicken"],lamb:["lamb"],onion:["onion","shallot","leek"],tomato:["tomato","passata","marinara","salsa"],pepper:["pepper","jalapeno","poblano","chile"]};
+function haveTerms(r){return S.onhand.filter(function(x){return (r.tags||[]).some(function(t){return t&&MEAT[t]&&matchHave(t,x)})})}
+function haveTag(t){if(GAME[t])return "game";for(var i=0;i<S.onhand.length;i++)if(matchHave(t,S.onhand[i]))return "user";return ""}
+function regStore(){if(!regMeta)return null;var a=activeStores();for(var i=0;i<a.length;i++)if(a[i].id===regMeta.storeId)return a[i];return null}
+function analyse(list,idx){
+  idx=idx||dealIndex();
+  var lines={},loose={},meat=[],total=0,perRecipe={},rs=regStore(),have={};
+  list.forEach(function(r){
+    var serv=servOf(r),f=factor(r),seen={},P=perRecipe[r.url]={by:{},sale:0,meatOnSale:false,have:0,meatHave:false};
+    (r.tags||[]).forEach(function(t,i){
+      var raw=r.ing[i]; if(!t){return} if(seen[t])return; seen[t]=1;
+      var hv=haveTag(t);if(hv){P.by[t]={kind:"have",game:hv==="game"};if(hv==="user"){P.have++;if(MEAT[t])P.meatHave=true}(have[t]=have[t]||{tag:t,name:raw,game:hv==="game",recipes:[]}).recipes.push(r.title);return}
+      var b=bestDeal(t,serv,idx),L,k;
+      if(b.best){k=b.best.store.id+"|"+b.best.deal.item;L=lines[k]=lines[k]||{key:k,store:b.best.store,deal:b.best.deal,lb:0,count:0,tags:{},recipes:[]};
+        L.lb+=MEAT[t]?needLb(t,b.best.deal,serv):needLb(t,b.best.deal,serv)*f;L.count+=f;L.tags[t]=1;L.recipes.push(r.title);
+        P.by[t]={kind:"sale",store:b.best.store.name,deal:b.best.deal};P.sale++;if(MEAT[t])P.meatOnSale=true;
+      } else if(REG[t]){var g=REG[t];k="reg|"+g.item;L=lines[k]=lines[k]||{key:k,store:rs,regName:regMeta.storeName,deal:g,reg:true,lb:0,count:0,tags:{},recipes:[]};
+        L.lb+=MEAT[t]?needLb(t,g,serv):needLb(t,g,serv)*f;L.count+=f;L.tags[t]=1;L.recipes.push(r.title);P.by[t]={kind:"reg",deal:g};
+      } else {
+        if(b.info)P.by[t]={kind:"info",store:b.info.store.name,deal:b.info.deal};
+        if(MEAT[t])meat.push({tag:t,name:raw,cost:serv*S.protAllow,recipe:r.title});
+        else (loose[t]=loose[t]||{tag:t,name:raw,cost:S.otherAllow,recipes:[]}).recipes.push(r.title);
+      }
+    });
+  });
+  var arr=Object.keys(lines).map(function(k){var L=lines[k];L.cost=lineCost(L.deal,L.lb,L.count,Object.keys(L.tags).length);total+=L.cost;return L});
+  var looseArr=Object.keys(loose).map(function(k){total+=loose[k].cost;return loose[k]});
+  meat.forEach(function(m){total+=m.cost});
+  return {lines:arr,loose:looseArr,meat:meat,total:total,perRecipe:perRecipe,have:Object.keys(have).map(function(k){return have[k]})};
+}
+
+/* ---------- planner ---------- */
+function rand(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296}
+function candidates(){return recipes.filter(function(r){
+  if(S.sites&&S.sites[r.site]===false)return false;
+  if(!S.types[r.meal])return false;
+  if(S.proteins&&S.proteins[r.protein]===false)return false;
+  if(avoidHits(r).length)return false;
+  if(S.diet&&S.diet!=="any"&&(r.diets||[]).indexOf(S.diet)<0)return false;
+  if(S.prepOnly&&!r.preps)return false;
+  if(S.minProtein>0&&!(r.proteinG>=S.minProtein))return false;
+  return true})}
+function firstTag(r){for(var i=0;i<(r.tags||[]).length;i++)if(r.tags[i])return r.tags[i];return ""}
+function has(r,name){return (r.ing||[]).indexOf(name)>=0}
+function score(r,cur,curTotal,idx,jit){
+  var a=analyse([r],idx).perRecipe[r.url],marg=analyse(cur.concat([r]),idx).total-curTotal,serv=servOf(r);
+  var sc=Math.min(a.sale,6)*2+(a.meatOnSale?5:0)+(r.proteinG?Math.min(r.proteinG,60)/10:2)+(r.preps?1.5:0)-(marg/serv)*0.6+Math.min(a.have,4)*2.5;
+  if(a.meatHave){var mine=haveTerms(r),covered={};cur.forEach(function(c){haveTerms(c).forEach(function(x){covered[x]=1})});sc+=mine.some(function(x){return !covered[x]})?10:1}
+  var first=firstTag(r),bird=cur.some(function(c){return has(c,"whole turkey")});
+  cur.forEach(function(c){if(c.protein===r.protein)sc-=4;if(c.site===r.site)sc-=0.5;if(firstTag(c)===first)sc-=6});
+  if(has(r,"cooked turkey"))sc+=bird?4:-9;
+  if(jit)sc+=rand()*jit; return {sc:sc,marg:marg};
+}
+function generate(jitter){
+  var idx=dealIndex(),byUrl={};recipes.forEach(function(r){byUrl[r.url]=r});
+  var chosen=locked.map(function(u){return byUrl[u]}).filter(Boolean);
+  var pool=candidates().filter(function(r){return locked.indexOf(r.url)<0});
+  var n=Math.max(1,Math.min(12,S.meals|0)),jit=jitter?9:0;
+  while(chosen.length<n&&pool.length){
+    var ct=analyse(chosen,idx).total,bi=-1,bs=-1e9;
+    pool.forEach(function(r,i){var s=score(r,chosen,ct,idx,jit).sc;if(s>bs){bs=s;bi=i}});
+    chosen.push(pool.splice(bi,1)[0]);
+  }
+  for(var guard=0;guard<30;guard++){
+    var tot=analyse(chosen,idx).total; if(tot<=S.budget)break;
+    var worst=-1,wm=-1;
+    chosen.forEach(function(r,i){ if(locked.indexOf(r.url)>=0)return;
+      var m=tot-analyse(chosen.filter(function(x){return x!==r}),idx).total; if(m>wm){wm=m;worst=i}});
+    if(worst<0)break;
+    var rest=chosen.filter(function(_,i){return i!==worst}),rt=analyse(rest,idx).total,bi2=-1,bs2=-1e9;
+    pool.forEach(function(r,i){var s=score(r,rest,rt,idx,jit); if(s.marg<wm-0.01&&s.sc>bs2){bs2=s.sc;bi2=i}});
+    if(bi2<0)break;
+    var out=chosen[worst]; chosen[worst]=pool.splice(bi2,1)[0]; pool.push(out);
+  }
+  picks=chosen.map(function(r){return r.url});
+}
+
+/* ---------- setup ---------- */
+function fmtDate(iso){var p=String(iso||"").split("-");if(p.length<3)return "";return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][p[1]-1]+" "+(+p[2])}
+function todayIso(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function townObj(){for(var i=0;i<towns.length;i++)if(towns[i].id===S.town)return towns[i];return null}
+function storeById(id){for(var i=0;i<stores.length;i++)if(stores[i].id===id)return stores[i];return null}
+function editionOff(s){return !!(s.checkedTowns&&S.town&&s.checkedTowns.indexOf(S.town)<0)}
+function chipRow(el,items,isOn,onToggle){
+  el.innerHTML=items.map(function(x){return '<button class="chip" data-k="'+esc(x[0])+'" aria-pressed="'+(isOn(x[0])?"true":"false")+'">'+esc(x[1])+(x[2]?' <small>'+esc(x[2])+'</small>':'')+'</button>'}).join("");
+  el.onclick=function(e){var b=e.target.closest(".chip");if(!b)return;onToggle(b.getAttribute("data-k"));renderControls()};
+}
+function checkCard(s){var on=S.stores[s.id]===true,n=(s.items||[]).filter(function(d){return d.price!=null}).length;
+  return '<label class="check'+(on?" on":"")+'"><input type="checkbox" id="st-'+esc(s.id)+'" data-k="'+esc(s.id)+'"'+(on?" checked":"")+'><span><b>'+esc(s.name)+'</b><span class="small muted">'+(s.noFlyer?"no flyer to read, so no prices":n+' priced deals, to '+esc(fmtDate(s.validTo)))+'</span></span></label>'}
+function renderControls(){
+  $("budget").value=S.budget;$("meals").value=S.meals;$("minProtein").value=S.minProtein;$("protAllow").value=S.protAllow;$("otherAllow").value=S.otherAllow;
+  $("prepOnly").setAttribute("aria-pressed",S.prepOnly?"true":"false");$("babyNote").hidden=!S.types.baby;$("dietNote").hidden=!S.diet||S.diet==="any";
+  if(!loaded)return;
+  chipRow($("townChips"),towns.map(function(t){return [t.id,t.name,t.sub||""]}),function(k){return S.town===k},function(k){
+    if(S.town===k)return; S.town=k; var t=townObj(); S.stores={}; (t.inTown.length?t.inTown:t.near).forEach(function(id){var st=storeById(id);if(st&&!st.noFlyer)S.stores[id]=true})});
+  var t=townObj();$("townNote").textContent=t&&t.note?t.note:"";
+  if(!t)$("storeChecks").innerHTML='<span class="muted">Pick your town first.</span>';
+  else{var used={},grp=function(title,ids){var list=ids.map(storeById).filter(Boolean);list.forEach(function(s){used[s.id]=1});return list.length?'<div class="field" style="margin-bottom:12px"><span class="label">'+title+'</span><div class="checks">'+list.map(checkCard).join("")+'</div></div>':''};
+    var html=grp("In "+esc(t.name),t.inTown)+grp(t.inTown.length?"A short drive away":"Closest stores",t.near);
+    var rest=stores.filter(function(s){return !used[s.id]});
+    html+='<details class="more"'+(rest.some(function(s){return S.stores[s.id]===true})?" open":"")+'><summary>Other stores in Windsor-Essex</summary><div class="checks" style="margin-top:10px">'+rest.map(checkCard).join("")+'</div></details>';
+    $("storeChecks").innerHTML=html;}
+  chipRow($("siteChips"),sites.map(function(s){return [s.site,s.site,"("+s.n+")"]}),function(k){return !S.sites||S.sites[k]!==false},function(k){S.sites=S.sites||{};S.sites[k]=(S.sites[k]===false)});
+  chipRow($("typeChips"),TYPES,function(k){return !!S.types[k]},function(k){S.types[k]=!S.types[k]});
+  chipRow($("algChips"),ALGS.map(function(k){return [k,k.charAt(0).toUpperCase()+k.slice(1)]}),function(k){return !!S.alg[k]},function(k){S.alg[k]=!S.alg[k]});
+  $("avoidChips").innerHTML=S.avoid.map(function(x){return '<button class="chip" aria-pressed="true" data-k="'+esc(x)+'" title="Remove">'+esc(x)+' <small>✕</small></button>'}).join("");
+  if(ALGS.some(function(k){return S.alg[k]})||S.avoid.length)$("more").open=true;
+  chipRow($("dietChips"),DIETS,function(k){return (S.diet||"any")===k},function(k){S.diet=k});
+  $("haveChips").innerHTML=S.onhand.map(function(x){var n=recipes.filter(function(r){return (r.tags||[]).some(function(t){return t&&matchHave(t,x)})}).length;return '<button class="chip" aria-pressed="true" data-k="'+esc(x)+'" title="Remove">'+esc(x)+' <small>'+(n?n+" recipes":"no recipes use this")+' ✕</small></button>'}).join("");
+  chipRow($("proteinChips"),PROT,function(k){return !S.proteins||S.proteins[k]!==false},function(k){S.proteins=S.proteins||{};S.proteins[k]=(S.proteins[k]===false)});
+  var any=activeStores().length>0,n=candidates().length,hint;
+  if(!t)hint="Start by picking your town.";
+  else if(!any)hint="Pick at least one store.";
+  else if(!n)hint="No recipes match. Turn on more meal types or ingredients, or loosen the eating style.";
+  else hint=n+" recipes match your choices.";
+  $("setupHint").textContent=hint;$("build").disabled=!(t&&any&&n);
+  $("cancelSetup").hidden=!picks.length;
+}
+function showView(){var setup=editing||!picks.length;$("setup").hidden=!setup;$("results").hidden=setup}
+function renderHeader(){
+  var g=activeStores().filter(function(s){return s.validFrom});if(!g.length)g=stores.filter(function(s){return s.validFrom});
+  if(!g.length){$("weekDates").textContent=loaded?"No flyers loaded":"Loading";return}
+  var from=g.map(function(s){return s.validFrom}).sort()[0],to=g.map(function(s){return s.validTo}).sort().pop();
+  $("weekDates").textContent=fmtDate(from)+" to "+fmtDate(to);
+  var td=todayIso(),ended=g.filter(function(s){return s.validTo<td}),st=$("stale");
+  if(ended.length===g.length){st.hidden=false;st.textContent="These flyers have ended, so the prices here are out of date until the next refresh."}
+  else if(ended.length){st.hidden=false;st.textContent="Ended already: "+ended.map(function(s){return s.name+" ("+fmtDate(s.validTo)+")"}).join(", ")+". The other flyers are current."}
+  else st.hidden=true;
+}
+function renderPlanbar(){var names=activeStores().map(function(s){return s.name}),t=townObj();
+  $("planWhat").textContent=(t?t.name+" · ":"")+picks.length+(picks.length===1?" recipe":" recipes")+" · "+money(S.budget).replace(".00","")+" budget · "+(names.length?names.join(", "):"no stores picked")}
+
+/* ---------- plan ---------- */
+function pickedRecipes(){var byUrl={};recipes.forEach(function(r){byUrl[r.url]=r});return picks.map(function(u){return byUrl[u]}).filter(Boolean)}
+function per(d){return d.unit==="lb"?"/lb":""}
+function renderPlan(){
+  var list=pickedRecipes(),idx=dealIndex(),A=analyse(list,idx);
+  $("planEmpty").hidden=list.length>0;
+  var serv=list.reduce(function(a,r){return a+servOf(r)},0),pg=list.filter(function(r){return r.proteinG}),avg=pg.length?pg.reduce(function(a,r){return a+r.proteinG},0)/pg.length:0;
+  var sm=$("summary"); sm.hidden=!list.length;
+  if(list.length){var over=A.total>S.budget+0.005,pct=Math.min(100,A.total/S.budget*100);
+    sm.innerHTML='<div class="'+(over?"over":"")+'"><span class="label">Estimated spend</span><span class="big num">'+money(A.total)+'</span><div class="bar"><i style="width:'+pct.toFixed(0)+'%"></i></div><span class="small state">'+(over?money(A.total-S.budget)+" over your "+money(S.budget)+" budget":money(S.budget-A.total)+" under your "+money(S.budget)+" budget")+'</span></div>'+
+    '<div><span class="label">Servings</span><span class="big num">'+serv+'</span><span class="small muted">from '+list.length+' recipes</span></div>'+
+    '<div><span class="label">Cost per serving</span><span class="big num">'+(serv?money(A.total/serv):"n/a")+'</span><span class="small muted">estimate</span></div>'+
+    '<div><span class="label">Protein per serving</span><span class="big num">'+(avg?Math.round(avg)+" g":"n/a")+'</span><span class="small muted">'+(pg.length?"average of "+pg.length+" recipes that list it":"not listed by these recipes")+'</span></div>';}
+  $("mealsGrid").innerHTML=list.map(function(r){
+    var a=A.perRecipe[r.url],seen={},ings=(r.ing||[]).map(function(raw,i){var t=r.tags[i];
+      if(!t)return '<span class="ing pantry">'+esc(raw)+'</span>';
+      if(seen[t])return"";seen[t]=1;var b=a.by[t];
+      if(b&&b.kind==="have")return '<span class="ing have">'+esc(raw)+" · "+(b.game?"from your freezer":"on hand")+'</span>';
+      if(b&&b.kind==="sale")return '<span class="ing sale" title="'+esc(b.store+": "+b.deal.item)+'">'+esc(raw)+" · "+esc(b.store)+" "+money(b.deal.price)+per(b.deal)+'</span>';
+      if(b&&b.kind==="reg")return '<span class="ing reg" title="'+esc("Regular price: "+b.deal.item)+'">'+esc(raw)+" · "+money(b.deal.price)+per(b.deal)+'</span>';
+      if(b&&b.kind==="info")return '<span class="ing" title="'+esc(b.deal.item)+'">'+esc(raw)+" · "+esc(b.store)+": "+esc((b.deal.note||"").split(",")[0].toLowerCase())+'</span>';
+      return '<span class="ing">'+esc(raw)+'</span>'}).join("");
+    var isL=locked.indexOf(r.url)>=0,t=r.time?(r.time>=180?Math.round(r.time/60)+" hr":r.time+" min"):"";
+    return '<article class="meal"><div class="mealhead">'+art(r)+'<div><div class="label">'+esc(r.site)+' · '+esc(r.method||r.meal)+'</div>'+
+      '<h3><a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a></h3></div></div>'+
+      '<div class="facts">'+(r.proteinG?'<span><b class="num">'+r.proteinG+' g</b> protein</span>':'')+'<span class="serv"><button class="btn sm" data-act="less" data-u="'+esc(r.url)+'" aria-label="Fewer servings">−</button><b class="num">'+servOf(r)+'</b> servings<button class="btn sm" data-act="more" data-u="'+esc(r.url)+'" aria-label="More servings">+</button></span>'+(S.scale[r.url]&&r.servings&&S.scale[r.url]!==r.servings?'<span>recipe makes '+r.servings+'</span>':'')+(t?'<span><b class="num">'+t+'</b>'+(r.time>=180?" incl. hands-off time":"")+'</span>':'')+(r.preps?'<span>reheats well</span>':'<span>best fresh</span>')+(r.ages?'<span>ages: <b>'+esc(r.ages)+'</b></span>':'')+'</div>'+
+      (avoidHits(r).length?'<div class="flag">On your avoid list: '+esc(avoidHits(r).join(", "))+'</div>':'')+
+      (r.flags&&r.flags.length?'<div class="flag">Contains '+esc(r.flags.join(", "))+(r.flags.indexOf("honey")>=0?". No honey before 12 months.":".")+'</div>':'')+
+      '<div class="ings">'+ings+'</div>'+
+      '<a class="seebtn" href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">See photo and recipe</a>'+
+      '<div class="foot"><span><span class="cost num">'+money(analyse([r],idx).total)+'</span> <span class="small muted">if bought alone</span></span><span class="rowacts">'+
+      '<button class="btn sm" data-act="lock" data-u="'+esc(r.url)+'" aria-pressed="'+(isL?"true":"false")+'">'+(isL?"Kept":"Keep")+'</button>'+
+      '<button class="btn sm" data-act="swap" data-u="'+esc(r.url)+'">Swap</button>'+
+      '<button class="btn sm" data-act="remove" data-u="'+esc(r.url)+'">Remove</button></span></div></article>'}).join("");
+  renderList(A,list);
+}
+
+/* ---------- shopping list ---------- */
+function qtyText(L){var d=L.deal;if(d.unit==="lb")return "about "+(Math.round(Math.max(d.minLb||0,L.lb)*10)/10)+" lb";if(d.packLb)return Math.max(1,Math.ceil(L.lb/d.packLb-0.05))+" x";if(d.shared)return Object.keys(L.tags).length+" x";return (Math.ceil(L.count-1e-6)*(d.per||1))+" x"}
+function findUrl(L){if(L.reg)return L.deal.url;var st=L.store;if(!st||!st.searchUrl)return "";return st.searchUrl+encodeURIComponent(Object.keys(L.tags)[0]||L.deal.item)}
+function uniq(a){return a.filter(function(x,i){return a.indexOf(x)===i})}
+function lineRow(L,endDate){var on=checked.indexOf(L.key)>=0,d=L.deal,u=findUrl(L);
+  return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(L.key)+'"'+(on?" checked":"")+'><span>'+esc(d.item)+(d.verify?' <span class="flag">check in store</span>':'')+(d.ends&&endDate&&d.ends<endDate?' <span class="flag">ends '+esc(fmtDate(d.ends))+'</span>':'')+(L.reg&&d.note?' <span class="flag">'+esc(d.note)+'</span>':'')+'<br><span class="small muted">for '+esc(uniq(L.recipes).join("; "))+'</span></span></label></td>'+
+  '<td class="r num">'+esc(qtyText(L))+' '+(L.reg?'<span class="small muted">regular '+(L.store?"":"at "+esc(L.regName)+" ")+'</span>'+money(d.price)+per(d):'<span class="tag">'+money(d.price)+per(d)+'</span>')+(u?'<br><a class="small" href="'+esc(safeUrl(u))+'" target="_blank" rel="noopener">Find online</a>':'')+'</td><td class="r num">'+money(L.cost)+'</td></tr>'}
+function estRow(x){var on=checked.indexOf(x.key)>=0;return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(x.key)+'"'+(on?" checked":"")+'><span>'+esc(x.name)+'<br><span class="small muted">'+esc(x.sub)+'</span></span></label></td><td class="r small muted">no price found, estimate</td><td class="r num">'+money(x.cost)+'</td></tr>'}
+function byDept(rows){var g={};rows.forEach(function(r){(g[r.dept]=g[r.dept]||[]).push(r)});return DEPTS.concat(Object.keys(g).filter(function(k){return DEPTS.indexOf(k)<0})).filter(function(k){return g[k]}).map(function(k){return {dept:k,rows:g[k]}})}
+var groups=[];
+function buildGroups(A){
+  var by={},other=[];
+  A.lines.forEach(function(L){var row={dept:L.deal.dept||"Pantry",L:L,text:qtyText(L)+" "+L.deal.item+" ("+money(L.deal.price)+per(L.deal)+(L.reg?" regular":"")+")",cost:L.cost};
+    if(!L.store){other.push(row);return} (by[L.store.id]=by[L.store.id]||{id:L.store.id,name:L.store.name,store:L.store,rows:[],sum:0}).rows.push(row);by[L.store.id].sum+=L.cost});
+  A.meat.forEach(function(m){other.push({dept:DEPT[m.tag]||"Meat & seafood",est:{key:"x|"+m.name+"|"+m.recipe,name:m.name,sub:"for "+m.recipe,cost:m.cost},text:m.name+" (for "+m.recipe+")",cost:m.cost})});
+  A.loose.forEach(function(l){other.push({dept:DEPT[l.tag]||"Pantry",est:{key:"x|"+l.name,name:l.name,sub:"for "+uniq(l.recipes).join("; "),cost:l.cost},text:l.name,cost:l.cost})});
+  groups=Object.keys(by).map(function(k){return by[k]}).sort(function(a,b){return (a.store.order||0)-(b.store.order||0)});
+  if(other.length)groups.push({id:"any",name:"Not on sale this week",any:true,rows:other,sum:other.reduce(function(a,x){return a+x.cost},0)});
+  if(A.have&&A.have.length)groups.push({id:"have",name:"Already have",have:true,sum:0,rows:A.have.map(function(h){return {dept:DEPT[h.tag]||"Pantry",hv:h,text:h.name+" (for "+uniq(h.recipes).join("; ")+")",cost:0}})});
+}
+function groupText(g){return g.name.toUpperCase()+(g.any?" (buy at any store)":g.have?" (nothing to buy)":"")+"\n"+byDept(g.rows).map(function(d){return d.dept+"\n"+d.rows.map(function(r){return "- "+r.text}).join("\n")}).join("\n")}
+function notesText(list,A){var t=townObj();
+  return "Connect Meal Plan"+(t?" · "+t.name:"")+"\nFlyer prices to "+$("weekDates").textContent.split(" to ").pop()+" · about "+money(A.total)+"\n\n"+groups.map(groupText).join("\n\n")+"\n\nRECIPES\n"+list.map(function(r){return "- "+r.title+"\n  "+r.url}).join("\n")+"\n\nMade with the Connect Meal Plan Maker · Connect Chiropractic"}
+var lastA=null,lastList=[];
+function renderList(A,list){
+  lastA=A;lastList=list;var body=$("listBody");
+  if(!picks.length){body.innerHTML='<div class="empty">Your shopping list fills in once the plan has recipes.</div>';return}
+  buildGroups(A);
+  var html='<div class="notes"><div class="rowacts"><button class="btn primary" id="copyAll">Copy list for Notes</button><span class="small muted">Copies the whole list, sorted by store and department. Paste it into Notes on iPhone or Keep on Android.</span></div>'+
+    (notesOpen?'<textarea class="copybox" id="notesBox" readonly aria-label="Shopping list as text">'+esc(notesText(list,A))+'</textarea><span class="small muted">Copy did not work in this view. Press and hold the text above, choose Select All, then Copy.</span>':'')+'</div>';
+  html+=groups.map(function(g,i){
+    var head='<h2>'+esc(g.name)+'</h2><span class="rowacts"><span class="num"><b>'+money(g.sum)+'</b> <span class="muted small">'+(g.any?"buy at any of your stores":g.have?"from your kitchen or freezer":"flyer ends "+esc(fmtDate(g.store.validTo)))+'</span></span><button class="btn sm" data-copy="'+i+'">Copy</button></span>';
+    var note=g.have?'<div class="note">Check you have enough for the servings you are making.</div>':g.any?'<div class="note">Prices here are regular prices'+(regMeta?" at "+esc(regMeta.storeName):"")+', as a guide. Items marked estimate had no price to look up.</div>':(editionOff(g.store)?'<div class="note"><span class="flag">These prices are from the South Windsor edition of this flyer. Your store\'s edition may differ.</span></div>':'');
+    return '<div class="store"><header>'+head+'</header>'+note+'<div class="scroll"><table class="list">'+byDept(g.rows).map(function(d){
+      return '<tr class="dept"><th colspan="3">'+esc(d.dept)+'</th></tr>'+d.rows.map(function(r){return r.hv?'<tr><td>'+esc(r.hv.name)+'<br><span class="small muted">for '+esc(uniq(r.hv.recipes).join("; "))+'</span></td><td class="r small muted">'+(r.hv.game?"from your freezer":"on hand")+'</td><td class="r num">$0.00</td></tr>':r.L?lineRow(r.L,g.store?g.store.validTo:""):estRow(r.est)}).join("")}).join("")+'</table></div></div>'}).join("");
+  html+='<p class="small muted" style="margin:0;max-width:70ch">Quantities are estimates from serving counts. Open each recipe for exact amounts before you shop. Kitchen staples (garlic, oil, herbs, spices, sauces) are left off.</p>';
+  body.innerHTML=html;
+}
+
+/* ---------- deals + recipes ---------- */
+function renderDeals(){
+  if(!stores.length){$("dealsBody").innerHTML='<div class="empty">Loading flyer deals.</div>';return}
+  var act=activeStores(),ordered=act.concat(stores.filter(function(s){return act.indexOf(s)<0}));
+  $("dealsBody").innerHTML=ordered.map(function(s){var on=act.indexOf(s)>=0;
+    return '<details class="store"'+(on?" open":"")+'><summary><h2>'+esc(s.name)+'</h2><span class="small muted">'+(on?"in your plan · ":"")+(s.noFlyer?"no flyer available":esc(fmtDate(s.validFrom))+" to "+esc(fmtDate(s.validTo))+' · '+(s.items||[]).length+' items')+'</span></summary>'+
+    (s.storeNote?'<div class="note">'+esc(s.storeNote)+'</div>':'')+(editionOff(s)?'<div class="note"><span class="flag">South Windsor edition of this flyer. Your store\'s edition may differ.</span></div>':'')+
+    '<div class="scroll"><table><tr><th>Item</th><th class="r">Sale price</th></tr>'+byDept((s.items||[]).map(function(d){return {dept:d.dept||"Pantry",d:d}})).map(function(g){return '<tr class="dept"><th colspan="2">'+esc(g.dept)+'</th></tr>'+g.rows.map(function(x){var d=x.d;return '<tr><td>'+esc(d.item)+(d.note?'<br><span class="small muted">'+esc(d.note)+'</span>':'')+(d.verify?' <span class="flag">check in store</span>':'')+(d.ends&&d.ends<s.validTo?' <span class="flag">ends '+esc(fmtDate(d.ends))+'</span>':'')+'</td><td class="r">'+(d.price==null?'<span class="muted small">price not published</span>':'<span class="tag">'+money(d.price)+'</span> <span class="small muted">'+esc(d.unit==="lb"?"per lb":d.unit)+'</span>')+'</td></tr>'}).join("")}).join("")+
+    '</table></div><div class="note" style="border-bottom:0;border-top:1px solid var(--line)"><a href="'+esc(safeUrl(s.source))+'" target="_blank" rel="noopener">'+esc(s.sourceLabel||"Source")+'</a></div></details>'}).join("")+
+    (D.butchers&&D.butchers.length?'<h2>Local butchers</h2><p class="small muted" style="margin:-8px 0 0">No flyers to pull from. Call ahead for weekly specials.</p><div class="butchers">'+D.butchers.map(function(s){return '<div><h3>'+esc(s.name)+'</h3><span class="label">'+esc(s.town)+'</span><span class="small">'+esc(s.address)+'</span><span class="small num">'+esc(s.phone)+'</span><span class="small muted">'+esc(s.hours)+'</span>'+(s.website?'<a class="small" href="'+esc(safeUrl(s.website))+'" target="_blank" rel="noopener">Website</a>':'')+'</div>'}).join("")+'</div>':'');
+}
+function renderRecipes(){
+  if(!$("tab-recipes")||$("tab-recipes").hidden)return;
+  var q=$("rq").value.trim().toLowerCase(),p=$("rprot").value,st=$("rsite").value,idx=dealIndex();
+  var rows=recipes.filter(function(r){if(p&&r.protein!==p)return false;if(st&&r.site!==st)return false;if(!q)return true;return (r.title+" "+(r.ing||[]).join(" ")).toLowerCase().indexOf(q)>=0});
+  var shown=rows.slice(0,120);
+  $("rcount").textContent=rows.length+" of "+recipes.length+" recipes"+(rows.length>shown.length?", showing the first "+shown.length+". Search to narrow.":"");
+  $("rtable").innerHTML='<tr><th>Recipe</th><th>On sale at your stores</th><th class="r">Protein</th><th class="r">Est. cost</th><th></th></tr>'+shown.map(function(r){var a=analyse([r],idx),by=a.perRecipe[r.url].by,sale=[],seen={};(r.tags||[]).forEach(function(t,i){if(t&&!seen[t]&&by[t]&&by[t].kind==="sale"){seen[t]=1;sale.push(r.ing[i])}});var inP=picks.indexOf(r.url)>=0;
+    return '<tr><td><a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a><br><span class="small muted">'+esc(r.site)+' · '+esc(r.meal)+' · '+(r.servings||"about 4")+' servings</span></td><td class="small">'+(sale.length?esc(sale.join(", ")):'<span class="muted">none</span>')+'</td><td class="r num">'+(r.proteinG?r.proteinG+" g":'<span class="muted">n/a</span>')+'</td><td class="r num">'+money(a.total)+'</td><td class="r">'+(avoidHits(r).length?'<span class="flag">avoid list</span> ':'')+'<button class="btn sm" data-add="'+esc(r.url)+'"'+(inP?" disabled":"")+'>'+(inP?"In plan":"Add")+'</button></td></tr>'}).join("");
+}
+function renderAll(){renderControls();renderHeader();if(loaded){renderPlanbar();renderPlan();renderDeals();renderRecipes()}showView()}
+
+/* ---------- state ---------- */
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S:S,picks:picks,locked:locked,checked:checked}))}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(!d||!d.S)return;Object.keys(S).forEach(function(k){if(d.S[k]!=null)S[k]=d.S[k]});picks=d.picks||[];locked=d.locked||[];checked=d.checked||[]}catch(e){}
+  if(!S.proteins)S.proteins={};if(S.proteins.game==null)S.proteins.game=false;if(!Array.isArray(S.onhand))S.onhand=[];if(!S.scale)S.scale={};if(!S.diet)S.diet="any";if(!S.alg)S.alg={};if(!Array.isArray(S.avoid))S.avoid=[]}
+function changed(regen,jitter){ if(regen){ if(jitter)seed=(Date.now()%4294967296); generate(!!jitter)} renderAll(); save() }
+function copyText(txt,btn,fallback){try{navigator.clipboard.writeText(txt).then(function(){btn.textContent="Copied"},fallback)}catch(err){fallback()}}
+
+function num(id,key,lo,hi){$(id).addEventListener("change",function(){var v=parseFloat(this.value);if(isNaN(v))v=S[key];S[key]=Math.max(lo,Math.min(hi,v));renderControls()})}
+num("budget","budget",20,1000);num("meals","meals",1,12);num("minProtein","minProtein",0,80);num("protAllow","protAllow",0,20);num("otherAllow","otherAllow",0,20);
+function addHave(){var v=$("haveIn").value;v.split(",").forEach(function(x){x=x.trim().toLowerCase();if(x&&x.length<40&&S.onhand.indexOf(x)<0&&S.onhand.length<20)S.onhand.push(x)});$("haveIn").value="";renderControls()}
+$("haveAdd").onclick=addHave;$("haveIn").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addHave()}});
+$("haveChips").onclick=function(e){var b=e.target.closest(".chip");if(!b)return;var k=b.getAttribute("data-k");S.onhand=S.onhand.filter(function(x){return x!==k});renderControls()};
+function addAvoid(){$("avoidIn").value.split(",").forEach(function(x){x=x.trim().toLowerCase();if(x&&x.length<40&&S.avoid.indexOf(x)<0&&S.avoid.length<20)S.avoid.push(x)});$("avoidIn").value="";renderControls()}
+$("avoidAdd").onclick=addAvoid;$("avoidIn").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();addAvoid()}});
+$("avoidChips").onclick=function(e){var b=e.target.closest(".chip");if(!b)return;var k=b.getAttribute("data-k");S.avoid=S.avoid.filter(function(x){return x!==k});renderControls()};
+$("prepOnly").onclick=function(){S.prepOnly=!S.prepOnly;renderControls()};
+$("storeChecks").addEventListener("change",function(e){var c=e.target;if(!c.matches("input[type=checkbox]"))return;S.stores[c.getAttribute("data-k")]=c.checked;renderControls()});
+$("build").onclick=function(){editing=false;locked=[];checked=[];notesOpen=false;changed(true);showTab("plan");window.scrollTo(0,0)};
+$("cancelSetup").onclick=function(){editing=false;renderAll()};
+$("editSetup").onclick=function(){editing=true;renderAll();window.scrollTo(0,0)};
+$("shuffle").onclick=function(){changed(true,true)};
+$("mealsGrid").onclick=function(e){var b=e.target.closest("button[data-act]");if(!b)return;var u=b.getAttribute("data-u"),act=b.getAttribute("data-act"),i;
+  if(act==="less"||act==="more"){var rr=pickedRecipes().filter(function(x){return x.url===u})[0];if(!rr)return;S.scale[u]=Math.max(1,Math.min(30,servOf(rr)+(act==="more"?1:-1)));changed(false);return}
+  if(act==="lock"){i=locked.indexOf(u);if(i>=0)locked.splice(i,1);else locked.push(u);changed(false)}
+  else if(act==="remove"){picks=picks.filter(function(x){return x!==u});locked=locked.filter(function(x){return x!==u});S.meals=Math.max(1,picks.length);changed(false)}
+  else if(act==="swap"){var idx=dealIndex(),rest=pickedRecipes().filter(function(r){return r.url!==u}),rt=analyse(rest,idx).total,pool=candidates().filter(function(r){return picks.indexOf(r.url)<0});
+    if(!pool.length)return; seed=(Date.now()%4294967296);
+    var best=null,bs=-1e9;pool.forEach(function(r){var s=score(r,rest,rt,idx,6);if(rt+s.marg>S.budget)s.sc-=8;if(s.sc>bs){bs=s.sc;best=r}});
+    picks[picks.indexOf(u)]=best.url;locked=locked.filter(function(x){return x!==u});changed(false)}};
+$("listBody").addEventListener("change",function(e){var c=e.target;if(!c.matches("input[type=checkbox]"))return;var k=c.getAttribute("data-k"),i=checked.indexOf(k);if(c.checked&&i<0)checked.push(k);if(!c.checked&&i>=0)checked.splice(i,1);changed(false)});
+$("listBody").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+  function fb(txt){return function(){notesOpen=true;renderList(lastA,lastList);var t=$("notesBox");if(t){t.value=txt;t.focus();t.select()}}}
+  if(b.id==="copyAll"){var all=notesText(lastList,lastA);copyText(all,b,fb(all))}
+  else if(b.hasAttribute("data-copy")){var g=groups[+b.getAttribute("data-copy")];if(g){var tx=groupText(g);copyText(tx,b,fb(tx))}}});
+$("rtable").onclick=function(e){var b=e.target.closest("button[data-add]");if(!b)return;var u=b.getAttribute("data-add");if(picks.indexOf(u)<0){picks.push(u);locked.push(u);S.meals=picks.length;changed(false)}};
+$("rq").addEventListener("input",renderRecipes);$("rprot").addEventListener("change",renderRecipes);$("rsite").addEventListener("change",renderRecipes);
+function showTab(t){["plan","list","deals","recipes"].forEach(function(k){$("tab-"+k).hidden=k!==t});Array.prototype.forEach.call(document.querySelectorAll("nav.tabs button"),function(b){b.setAttribute("aria-selected",b.getAttribute("data-tab")===t?"true":"false")});if(t==="recipes")renderRecipes()}
+document.querySelector("nav.tabs").onclick=function(e){var b=e.target.closest("button");if(b)showTab(b.getAttribute("data-tab"))};
+
+function fail(){$("weekDates").textContent="Not loaded";var st=$("stale");st.hidden=false;st.textContent="The deals and recipes could not be loaded. Reload the page to try again.";$("setupHint").textContent=""}
+load();renderControls();
+Promise.all([fetch("data/stores.json").then(function(r){return r.json()}),fetch("data/recipes.json").then(function(r){return r.json()})]).then(function(res){
+  D=res[0];stores=(D.stores||[]).slice().sort(function(a,b){return (a.order||0)-(b.order||0)});towns=D.towns||[];
+  (D.meat||[]).forEach(function(t){MEAT[t]=1});(D.game||[]).forEach(function(t){GAME[t]=1});
+  $("haveList").innerHTML=Object.keys(D.depts||{}).sort().map(function(t){return '<option value="'+esc(t)+'">'}).join("");DEPT=D.depts||{};
+  if(D.regular){regMeta=D.regular;(D.regular.items||[]).forEach(function(it){(it.tags||[]).forEach(function(t){REG[t]=it})})}
+  recipes=res[1].recipes||[];var cnt={};recipes.forEach(function(r){cnt[r.site]=(cnt[r.site]||0)+1});
+  sites=(res[1].sites||[]).map(function(s){return {site:s.site,n:cnt[s.site]||0}});
+  $("rprot").innerHTML='<option value="">Any protein</option>'+PROT.map(function(p){return '<option value="'+p[0]+'">'+p[1]+'</option>'}).join("");
+  $("rsite").innerHTML='<option value="">Any site</option>'+sites.map(function(s){return '<option value="'+esc(s.site)+'">'+esc(s.site)+'</option>'}).join("");
+  if(S.town&&!townObj()){S.town=null;S.stores={}}
+  var known={};recipes.forEach(function(r){known[r.url]=1});picks=picks.filter(function(u){return known[u]});locked=locked.filter(function(u){return known[u]});
+  $("footNote").textContent="Prices come from public store flyers read on "+fmtDate(D.updated)+" and are estimates. Check the shelf price before you buy. Recipes link to the sites that wrote them.";
+  loaded=true;renderAll();
+}).catch(fail);
+})();
+</script>
+
+</body>
+</html>
