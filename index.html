@@ -430,7 +430,7 @@ function analyse(list,idx){
       var raw=r.ing[i]; if(!t){return} if(seen[t])return; seen[t]=1;
       var hv=haveTag(t);if(hv){P.by[t]={kind:"have",game:hv==="game"};if(hv==="user"){P.have++;if(MEAT[t])P.meatHave=true}(have[t]=have[t]||{tag:t,name:raw,game:hv==="game",recipes:[]}).recipes.push(r.title);return}
       var b=bestDeal(t,serv,idx),L,k;
-      if(b.best){k=b.best.store.id+"|"+b.best.deal.item;L=lines[k]=lines[k]||{key:k,store:b.best.store,deal:b.best.deal,lb:0,count:0,tags:{},recipes:[]};
+      if(b.best){k=b.best.store.id+"|"+b.best.deal.item+((b.best.deal.tags||[]).length>1?"|"+t:"");L=lines[k]=lines[k]||{key:k,store:b.best.store,deal:b.best.deal,lb:0,count:0,tags:{},recipes:[]};
         L.lb+=MEAT[t]?needLb(t,b.best.deal,serv):needLb(t,b.best.deal,serv)*f;L.count+=f;L.tags[t]=1;L.recipes.push(r.title);
         P.by[t]={kind:"sale",store:b.best.store.name,deal:b.best.deal};P.sale++;if(MEAT[t])P.meatOnSale=true;
       } else if(REG[t]){var g=REG[t];k="reg|"+g.item;L=lines[k]=lines[k]||{key:k,store:rs,regName:regMeta.storeName,deal:g,reg:true,lb:0,count:0,tags:{},recipes:[]};
@@ -620,15 +620,18 @@ function renderPlan(){
 function qtyText(L){var d=L.deal;if(d.unit==="lb")return "about "+(Math.round(Math.max(d.minLb||0,L.lb)*10)/10)+" lb";if(d.packLb)return Math.max(1,Math.ceil(L.lb/d.packLb-0.05))+" x";if(d.shared)return Object.keys(L.tags).length+" x";return (Math.ceil(L.count-1e-6)*(d.per||1))+" x"}
 function findUrl(L){if(L.reg)return L.deal.url;var st=L.store;if(!st||!st.searchUrl)return "";return st.searchUrl+encodeURIComponent(Object.keys(L.tags)[0]||L.deal.item)}
 function uniq(a){return a.filter(function(x,i){return a.indexOf(x)===i})}
+/* A flyer deal that covers a choice ("Carrots or yellow onions") is shown as the one ingredient the recipes call for. */
+function isCombo(L){var d=L.deal;return !L.reg&&((d.tags||[]).length>1||/\bor\b/i.test(d.item||""))}
+function lineName(L){var t=Object.keys(L.tags)[0];if(!isCombo(L)||!t)return L.deal.item;return t.charAt(0).toUpperCase()+t.slice(1)}
 function lineRow(L,endDate){var on=checked.indexOf(L.key)>=0,d=L.deal,u=findUrl(L);
-  return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(L.key)+'"'+(on?" checked":"")+'><span>'+esc(d.item)+(d.verify?' <span class="flag">check in store</span>':'')+(d.ends&&endDate&&d.ends<endDate?' <span class="flag">ends '+esc(fmtDate(d.ends))+'</span>':'')+(L.reg&&d.note?' <span class="flag">'+esc(d.note)+'</span>':'')+'<br><span class="small muted">for '+esc(uniq(L.recipes).join("; "))+'</span></span></label></td>'+
+  return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(L.key)+'"'+(on?" checked":"")+'><span>'+esc(lineName(L))+(d.verify?' <span class="flag">check in store</span>':'')+(d.ends&&endDate&&d.ends<endDate?' <span class="flag">ends '+esc(fmtDate(d.ends))+'</span>':'')+(L.reg&&d.note?' <span class="flag">'+esc(d.note)+'</span>':'')+(isCombo(L)?'<br><span class="small muted">Flyer deal: '+esc(d.item)+'</span>':'')+'<br><span class="small muted">for '+esc(uniq(L.recipes).join("; "))+'</span></span></label></td>'+
   '<td class="r num">'+esc(qtyText(L))+' '+(L.reg?'<span class="small muted">regular '+(L.store?"":"at "+esc(L.regName)+" ")+'</span>'+money(d.price)+per(d):'<span class="tag">'+money(d.price)+per(d)+'</span>')+(u?'<br><a class="small" href="'+esc(safeUrl(u))+'" target="_blank" rel="noopener">Find online</a>':'')+'</td><td class="r num">'+money(L.cost)+'</td></tr>'}
 function estRow(x){var on=checked.indexOf(x.key)>=0;return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(x.key)+'"'+(on?" checked":"")+'><span>'+esc(x.name)+'<br><span class="small muted">'+esc(x.sub)+'</span></span></label></td><td class="r small muted">no price found, estimate</td><td class="r num">'+money(x.cost)+'</td></tr>'}
 function byDept(rows){var g={};rows.forEach(function(r){(g[r.dept]=g[r.dept]||[]).push(r)});return DEPTS.concat(Object.keys(g).filter(function(k){return DEPTS.indexOf(k)<0})).filter(function(k){return g[k]}).map(function(k){return {dept:k,rows:g[k]}})}
 var groups=[];
 function buildGroups(A){
   var by={},other=[];
-  A.lines.forEach(function(L){var row={dept:L.deal.dept||"Pantry",L:L,text:qtyText(L)+" "+L.deal.item+" ("+money(L.deal.price)+per(L.deal)+(L.reg?" regular":"")+")",cost:L.cost};
+  A.lines.forEach(function(L){var row={dept:L.deal.dept||"Pantry",L:L,text:qtyText(L)+" "+lineName(L)+" ("+money(L.deal.price)+per(L.deal)+(L.reg?" regular":"")+")",cost:L.cost};
     if(!L.store){other.push(row);return} (by[L.store.id]=by[L.store.id]||{id:L.store.id,name:L.store.name,store:L.store,rows:[],sum:0}).rows.push(row);by[L.store.id].sum+=L.cost});
   A.meat.forEach(function(m){other.push({dept:DEPT[m.tag]||"Meat & seafood",est:{key:"x|"+m.name+"|"+m.recipe,name:m.name,sub:"for "+m.recipe,cost:m.cost},text:m.name+" (for "+m.recipe+")",cost:m.cost})});
   A.loose.forEach(function(l){other.push({dept:DEPT[l.tag]||"Pantry",est:{key:"x|"+l.name,name:l.name,sub:"for "+uniq(l.recipes).join("; "),cost:l.cost},text:l.name,cost:l.cost})});
