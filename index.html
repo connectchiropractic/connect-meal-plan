@@ -156,6 +156,9 @@ header.site .name{font-family:var(--display);font-weight:700;color:var(--head);l
 header.site .hright{display:flex;align-items:center;gap:18px}
 .addph{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#00704A;background:#fff;border:1.5px solid #00704A;border-radius:6px;padding:8px 12px;cursor:pointer;white-space:nowrap}
 .addph:hover{background:#00704A;color:#fff}
+.favbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:10px 14px;background:#D4E9E2;border-radius:8px;font-size:14px;color:#1E3932}
+.star{color:#00704A;font-weight:700;white-space:nowrap}
+button.starbtn{border:0;background:none;cursor:pointer;font-size:22px;line-height:1;padding:2px 8px 2px 0;color:#00704A;vertical-align:middle}
 .vegnote{margin:14px 0 0;padding:12px 14px;background:#D4E9E2;border-left:4px solid #00704A;border-radius:6px;font-size:14.5px;line-height:1.45;color:#1E3932}
 #addPhone{border:0;border-radius:14px;padding:26px 24px 22px;width:min(420px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(0,0,0,.3);color:#13201C;font-family:Lato,sans-serif}
 #addPhone::backdrop{background:rgba(15,36,30,.6)}
@@ -330,6 +333,7 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
       <button role="tab" data-tab="list" aria-selected="false">Shopping list</button>
       <button role="tab" data-tab="deals" aria-selected="false">Flyer deals</button>
       <button role="tab" data-tab="recipes" aria-selected="false">Recipe library</button>
+      <button role="tab" data-tab="favs" aria-selected="false" id="favTab" hidden>★ Dr. Steve's Favourites</button>
     </nav>
     <section id="tab-plan"><div class="empty" id="planEmpty">No recipes in the plan yet.</div><div class="meals" id="mealsGrid"></div></section>
     <section id="tab-list" hidden><div class="stack" id="listBody"></div></section>
@@ -342,6 +346,8 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
           <select id="rsite" aria-label="Site"><option value="">Any site</option></select>
           <span class="muted small" id="rcount"></span>
         </div>
+        <div class="favbar" id="favBar" hidden><span><b>Star mode.</b> Tap ☆ beside any recipe to star it. <span id="favN"></span></span><span class="rowacts"><button class="btn sm" id="favCopy" type="button">Copy my favourites</button><button class="btn sm ghost" id="favExit" type="button">Leave star mode</button></span></div>
+        <p class="muted small" id="favIntro" hidden>Recipes Dr. Steve cooks and recommends. Tap Add to put one in your week.</p>
         <div class="store scroll"><table id="rtable"></table></div>
       </div>
     </section>
@@ -453,9 +459,14 @@ function candidates(){return recipes.filter(function(r){
   return true})}
 function firstTag(r){for(var i=0;i<(r.tags||[]).length;i++)if(r.tags[i])return r.tags[i];return ""}
 function has(r,name){return (r.ing||[]).indexOf(name)>=0}
+var FAV={},favOnly=false,favEdit=false;
+try{if(/[?&]steve\b/.test(location.search))localStorage.setItem("cmp-fav-edit","1");favEdit=localStorage.getItem("cmp-fav-edit")==="1"}catch(e){}
+function favList(){return Object.keys(FAV)}
+function favSave(){try{localStorage.setItem("cmp-favs",JSON.stringify(favList()))}catch(e){}}
+function favUI(){var n=favList().length;$("favTab").hidden=!(n||favEdit);$("favBar").hidden=!favEdit;$("favN").textContent=n+" starred so far.";$("favIntro").hidden=!favOnly||favEdit}
 function score(r,cur,curTotal,idx,jit){
   var a=analyse([r],idx).perRecipe[r.url],marg=analyse(cur.concat([r]),idx).total-curTotal,serv=servOf(r);
-  var sc=Math.min(a.sale,6)*2+(a.meatOnSale?5:0)+(r.proteinG?Math.min(r.proteinG,60)/10:2)+(r.preps?1.5:0)-(marg/serv)*0.6+Math.min(a.have,4)*2.5;
+  var sc=Math.min(a.sale,6)*2+(a.meatOnSale?5:0)+(r.proteinG?Math.min(r.proteinG,60)/10:2)+(r.preps?1.5:0)-(marg/serv)*0.6+Math.min(a.have,4)*2.5+(FAV[r.url]?3:0);
   if(a.meatHave){var mine=haveTerms(r),covered={};cur.forEach(function(c){haveTerms(c).forEach(function(x){covered[x]=1})});sc+=mine.some(function(x){return !covered[x]})?10:1}
   var first=firstTag(r),bird=cur.some(function(c){return has(c,"whole turkey")});
   cur.forEach(function(c){if(c.protein===r.protein)sc-=4;if(c.site===r.site)sc-=0.5;if(firstTag(c)===first)sc-=6});
@@ -588,7 +599,7 @@ function renderPlan(){
       if(b&&b.kind==="info")return '<span class="ing" title="'+esc(b.deal.item)+'">'+esc(raw)+" · "+esc(b.store)+": "+esc((b.deal.note||"").split(",")[0].toLowerCase())+'</span>';
       return '<span class="ing">'+esc(raw)+'</span>'}).join("");
     var isL=locked.indexOf(r.url)>=0,t=r.time?(r.time>=180?Math.round(r.time/60)+" hr":r.time+" min"):"";
-    return '<article class="meal"><div class="mealhead">'+art(r)+'<div><div class="label">'+esc(r.site)+' · '+esc(r.method||r.meal)+'</div>'+
+    return '<article class="meal"><div class="mealhead">'+art(r)+'<div><div class="label">'+esc(r.site)+' · '+esc(r.method||r.meal)+(FAV[r.url]?' · <span class="star">★ Dr. Steve\'s favourite</span>':'')+'</div>'+
       '<h3><a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a></h3></div></div>'+
       '<div class="facts">'+(r.proteinG?'<span><b class="num">'+r.proteinG+' g</b> protein</span>':'')+'<span class="serv"><button class="btn sm" data-act="less" data-u="'+esc(r.url)+'" aria-label="Fewer servings">−</button><b class="num">'+servOf(r)+'</b> servings<button class="btn sm" data-act="more" data-u="'+esc(r.url)+'" aria-label="More servings">+</button></span>'+(S.scale[r.url]&&r.servings&&S.scale[r.url]!==r.servings?'<span>recipe makes '+r.servings+'</span>':'')+(t?'<span><b class="num">'+t+'</b>'+(r.time>=180?" incl. hands-off time":"")+'</span>':'')+(r.preps?'<span>reheats well</span>':'<span>best fresh</span>')+(r.ages?'<span>ages: <b>'+esc(r.ages)+'</b></span>':'')+'</div>'+
       (avoidHits(r).length?'<div class="flag">On your avoid list: '+esc(avoidHits(r).join(", "))+'</div>':'')+
@@ -655,11 +666,11 @@ function renderDeals(){
 function renderRecipes(){
   if(!$("tab-recipes")||$("tab-recipes").hidden)return;
   var q=$("rq").value.trim().toLowerCase(),p=$("rprot").value,st=$("rsite").value,idx=dealIndex();
-  var rows=recipes.filter(function(r){if(p&&r.protein!==p)return false;if(st&&r.site!==st)return false;if(!q)return true;return (r.title+" "+(r.ing||[]).join(" ")).toLowerCase().indexOf(q)>=0});
+  favUI();var rows=recipes.filter(function(r){if(favOnly&&!FAV[r.url])return false;if(p&&r.protein!==p)return false;if(st&&r.site!==st)return false;if(!q)return true;return (r.title+" "+(r.ing||[]).join(" ")).toLowerCase().indexOf(q)>=0});
   var shown=rows.slice(0,120);
   $("rcount").textContent=rows.length+" of "+recipes.length+" recipes"+(rows.length>shown.length?", showing the first "+shown.length+". Search to narrow.":"");
   $("rtable").innerHTML='<tr><th>Recipe</th><th>On sale at your stores</th><th class="r">Protein</th><th class="r">Est. cost</th><th></th></tr>'+shown.map(function(r){var a=analyse([r],idx),by=a.perRecipe[r.url].by,sale=[],seen={};(r.tags||[]).forEach(function(t,i){if(t&&!seen[t]&&by[t]&&by[t].kind==="sale"){seen[t]=1;sale.push(r.ing[i])}});var inP=picks.indexOf(r.url)>=0;
-    return '<tr><td><a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a><br><span class="small muted">'+esc(r.site)+' · '+esc(r.meal)+' · '+(r.servings||"about 4")+' servings</span></td><td class="small">'+(sale.length?esc(sale.join(", ")):'<span class="muted">none</span>')+'</td><td class="r num">'+(r.proteinG?r.proteinG+" g":'<span class="muted">n/a</span>')+'</td><td class="r num">'+money(a.total)+'</td><td class="r">'+(avoidHits(r).length?'<span class="flag">avoid list</span> ':'')+'<button class="btn sm" data-add="'+esc(r.url)+'"'+(inP?" disabled":"")+'>'+(inP?"In plan":"Add")+'</button></td></tr>'}).join("");
+    return '<tr><td>'+(favEdit?'<button class="starbtn" data-star="'+esc(r.url)+'" aria-label="'+(FAV[r.url]?"Remove star":"Star this recipe")+'">'+(FAV[r.url]?"★":"☆")+'</button>':(FAV[r.url]?'<span class="star" title="Dr. Steve\'s favourite">★ </span>':''))+'<a href="'+esc(safeUrl(r.url))+'" target="_blank" rel="noopener">'+esc(r.title)+'</a><br><span class="small muted">'+esc(r.site)+' · '+esc(r.meal)+' · '+(r.servings||"about 4")+' servings</span></td><td class="small">'+(sale.length?esc(sale.join(", ")):'<span class="muted">none</span>')+'</td><td class="r num">'+(r.proteinG?r.proteinG+" g":'<span class="muted">n/a</span>')+'</td><td class="r num">'+money(a.total)+'</td><td class="r">'+(avoidHits(r).length?'<span class="flag">avoid list</span> ':'')+'<button class="btn sm" data-add="'+esc(r.url)+'"'+(inP?" disabled":"")+'>'+(inP?"In plan":"Add")+'</button></td></tr>'}).join("");
 }
 function renderAll(){renderControls();renderHeader();if(loaded){renderPlanbar();renderPlan();renderDeals();renderRecipes()}showView()}
 
@@ -702,14 +713,18 @@ $("listBody").addEventListener("click",function(e){var b=e.target.closest("butto
   function fb(txt){return function(){notesOpen=true;renderList(lastA,lastList);var t=$("notesBox");if(t){t.value=txt;t.focus();t.select()}}}
   if(b.id==="copyAll"){var all=notesText(lastList,lastA);copyText(all,b,fb(all))}
   else if(b.hasAttribute("data-copy")){var g=groups[+b.getAttribute("data-copy")];if(g){var tx=groupText(g);copyText(tx,b,fb(tx))}}});
-$("rtable").onclick=function(e){var b=e.target.closest("button[data-add]");if(!b)return;var u=b.getAttribute("data-add");if(picks.indexOf(u)<0){picks.push(u);locked.push(u);S.meals=picks.length;changed(false)}};
+$("rtable").onclick=function(e){var sb=e.target.closest("button[data-star]");if(sb){var su=sb.getAttribute("data-star");if(FAV[su])delete FAV[su];else FAV[su]=1;favSave();renderRecipes();return}var b=e.target.closest("button[data-add]");if(!b)return;var u=b.getAttribute("data-add");if(picks.indexOf(u)<0){picks.push(u);locked.push(u);S.meals=picks.length;changed(false)}};
 $("rq").addEventListener("input",renderRecipes);$("rprot").addEventListener("change",renderRecipes);$("rsite").addEventListener("change",renderRecipes);
-function showTab(t){["plan","list","deals","recipes"].forEach(function(k){$("tab-"+k).hidden=k!==t});Array.prototype.forEach.call(document.querySelectorAll("nav.tabs button"),function(b){b.setAttribute("aria-selected",b.getAttribute("data-tab")===t?"true":"false")});if(t==="recipes")renderRecipes()}
+function showTab(t){favOnly=t==="favs";var sec=favOnly?"recipes":t;["plan","list","deals","recipes"].forEach(function(k){$("tab-"+k).hidden=k!==sec});Array.prototype.forEach.call(document.querySelectorAll("nav.tabs button"),function(b){b.setAttribute("aria-selected",b.getAttribute("data-tab")===t?"true":"false")});if(sec==="recipes")renderRecipes()}
+$("favCopy").onclick=function(){var by={};recipes.forEach(function(r){by[r.url]=r});var txt="Dr. Steve's favourites ("+favList().length+")\n"+favList().map(function(u){return "- "+(by[u]?by[u].title+" ("+by[u].site+")":"")+"\n  "+u}).join("\n");var b=this;function done(){b.textContent="Copied. Paste it to Claude.";setTimeout(function(){b.textContent="Copy my favourites"},2500)}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,function(){window.prompt("Copy this list:",txt)});else window.prompt("Copy this list:",txt)};
+$("favExit").onclick=function(){try{localStorage.removeItem("cmp-fav-edit");localStorage.removeItem("cmp-favs")}catch(e){}location.href=location.pathname};
 document.querySelector("nav.tabs").onclick=function(e){var b=e.target.closest("button");if(b)showTab(b.getAttribute("data-tab"))};
 
 function fail(){$("weekDates").textContent="Not loaded";var st=$("stale");st.hidden=false;st.textContent="The deals and recipes could not be loaded. Reload the page to try again.";$("setupHint").textContent=""}
 load();renderControls();
-Promise.all([fetch("data/stores.json").then(function(r){return r.json()}),fetch("data/recipes.json").then(function(r){return r.json()})]).then(function(res){
+Promise.all([fetch("data/stores.json").then(function(r){return r.json()}),fetch("data/recipes.json").then(function(r){return r.json()}),fetch("data/favourites.json").then(function(r){return r.json()}).catch(function(){return {favourites:[]}})]).then(function(res){
+  var fl=(res[2]&&res[2].favourites)||[];if(favEdit){try{var lf=JSON.parse(localStorage.getItem("cmp-favs")||"null");if(Array.isArray(lf))fl=lf}catch(e){}}fl.forEach(function(u){FAV[u]=1});
   D=res[0];stores=(D.stores||[]).slice().sort(function(a,b){return (a.order||0)-(b.order||0)});towns=D.towns||[];
   (D.meat||[]).forEach(function(t){MEAT[t]=1});(D.game||[]).forEach(function(t){GAME[t]=1});
   $("haveList").innerHTML=Object.keys(D.depts||{}).sort().map(function(t){return '<option value="'+esc(t)+'">'}).join("");DEPT=D.depts||{};
@@ -721,6 +736,7 @@ Promise.all([fetch("data/stores.json").then(function(r){return r.json()}),fetch(
   if(S.town&&!townObj()){S.town=null;S.stores={}}
   var known={};recipes.forEach(function(r){known[r.url]=1});picks=picks.filter(function(u){return known[u]});locked=locked.filter(function(u){return known[u]});
   $("footNote").textContent="Prices come from public store flyers read on "+fmtDate(D.updated)+" and are estimates. Check the shelf price before you buy. Recipes link to the sites that wrote them.";
+  Object.keys(FAV).forEach(function(u){if(!known[u])delete FAV[u]});favUI();
   loaded=true;renderAll();
 }).catch(fail);
 (function(){var d=document.getElementById("addPhone");if(!d)return;
