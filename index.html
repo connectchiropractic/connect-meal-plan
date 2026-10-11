@@ -127,18 +127,23 @@ td.r,th.r{text-align:right;white-space:nowrap}
 .list label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
 .list input{margin-top:3px;accent-color:var(--green);width:16px;height:16px;flex:none}
 .list tr.done td{color:var(--muted);text-decoration:line-through}
+.list .sub{font-size:13px;color:var(--muted);padding-left:33px}
+.list tr.nochk .sub{padding-left:0}
 @media (max-width:640px){
 .list,.list tbody{display:block}
-.list tr{display:grid;grid-template-columns:minmax(0,1fr) auto;border-bottom:1px solid var(--line)}
+.list tr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;column-gap:12px;align-items:start;padding:9px 14px;border-bottom:1px solid var(--line)}
 .list tr:last-child{border-bottom:0}
-.list tr.dept{display:block;border-bottom:0}.list tr.dept th{display:block}
-.list td{border-bottom:0}
-.list td:first-child{grid-column:1/-1;padding-bottom:2px}
-.list td:nth-child(2){text-align:left;white-space:normal;padding:0 8px 9px 40px}
-.list tr.nochk td:nth-child(2){padding-left:14px}
-.list td:nth-child(3){padding-top:0;padding-bottom:9px;font-weight:700}
-.list td:nth-child(2) br{display:none}.list td:nth-child(2) a{margin-left:10px}
+.list tr.dept{display:block;padding:0;border-bottom:0}.list tr.dept th{display:block}
+.list td{display:contents}
+.list td:nth-child(3){display:block;padding:0;border:0;grid-row:1;grid-column:3;font-weight:700}
+.list label,.list .nm{grid-row:1;grid-column:1}
+.list .qp{grid-row:1;grid-column:2;text-align:right;white-space:nowrap}
+.list .qp .reg,.list .qp .xm,.list td br{display:none}
+.list .sub{grid-row:2;grid-column:1/-1;margin:7px 0 0 33px;padding:6px 0 0;border-top:1px solid var(--line)}
+.list tr.nochk .sub{margin-left:0}
+.list .find{grid-row:3;grid-column:1/-1;justify-self:start;margin:3px 0 0 33px}
 .list .for{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.list tr.done label,.list tr.done .sub,.list tr.done .qp{text-decoration:line-through;color:var(--muted)}
 }
 .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .filters input[type=search],.filters select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0;max-width:100%}
@@ -637,9 +642,9 @@ function uniq(a){return a.filter(function(x,i){return a.indexOf(x)===i})}
 function isCombo(L){var d=L.deal;return !L.reg&&((d.tags||[]).length>1||/\bor\b/i.test(d.item||""))}
 function lineName(L){var t=Object.keys(L.tags)[0];if(!isCombo(L)||!t)return L.deal.item;return t.charAt(0).toUpperCase()+t.slice(1)}
 function lineRow(L,endDate){var on=checked.indexOf(L.key)>=0,d=L.deal,u=findUrl(L);
-  return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(L.key)+'"'+(on?" checked":"")+'><span>'+esc(lineName(L))+(d.verify?' <span class="flag">check in store</span>':'')+(d.ends&&endDate&&d.ends<endDate?' <span class="flag">ends '+esc(fmtDate(d.ends))+'</span>':'')+(L.reg&&d.note?' <span class="flag">'+esc(d.note)+'</span>':'')+(isCombo(L)?'<br><span class="small muted">Flyer deal: '+esc(d.item)+'</span>':'')+'<br><span class="small muted for">for '+esc(uniq(L.recipes).join("; "))+'</span></span></label></td>'+
-  '<td class="r num">'+esc(qtyText(L))+' '+(L.reg?'<span class="small muted">regular '+(L.store?"":"at "+esc(L.regName)+" ")+'</span>'+money(d.price)+per(d):'<span class="tag">'+money(d.price)+per(d)+'</span>')+(u?'<br><a class="small" href="'+esc(safeUrl(u))+'" target="_blank" rel="noopener">Find online</a>':'')+'</td><td class="r num">'+money(L.cost)+'</td></tr>'}
-function estRow(x){var on=checked.indexOf(x.key)>=0;return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(x.key)+'"'+(on?" checked":"")+'><span>'+esc(x.name)+'<br><span class="small muted for">'+esc(x.sub)+'</span></span></label></td><td class="r small muted">no price found, estimate</td><td class="r num">'+money(x.cost)+'</td></tr>'}
+  return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(L.key)+'"'+(on?" checked":"")+'><span>'+esc(lineName(L))+(d.verify?' <span class="flag">check in store</span>':'')+(d.ends&&endDate&&d.ends<endDate?' <span class="flag">ends '+esc(fmtDate(d.ends))+'</span>':'')+(L.reg&&d.note?' <span class="flag">'+esc(d.note)+'</span>':'')+'</span></label><div class="sub">'+(isCombo(L)?'<div>Flyer deal: '+esc(d.item)+'</div>':'')+'<span class="for">for '+esc(uniq(L.recipes).join("; "))+'</span></div></td>'+
+  '<td class="r num"><span class="qp">'+esc(qtyText(L)).replace(/^about /,'<span class="xm">about </span>')+' '+(L.reg?'<span class="small muted reg">regular '+(L.store?"":"at "+esc(L.regName)+" ")+'</span>'+money(d.price)+per(d):'<span class="tag">'+money(d.price)+per(d)+'</span>')+'</span>'+(u?'<br><a class="small find" href="'+esc(safeUrl(u))+'" target="_blank" rel="noopener">Find online</a>':'')+'</td><td class="r num">'+money(L.cost)+'</td></tr>'}
+function estRow(x){var on=checked.indexOf(x.key)>=0;return '<tr class="'+(on?"done":"")+'"><td><label><input type="checkbox" data-k="'+esc(x.key)+'"'+(on?" checked":"")+'><span>'+esc(x.name)+'</span></label><div class="sub"><span class="for">'+esc(x.sub)+'</span></div></td><td class="r small muted"><span class="qp"><span class="xm">no price found, </span>estimate</span></td><td class="r num">'+money(x.cost)+'</td></tr>'}
 function byDept(rows){var g={};rows.forEach(function(r){(g[r.dept]=g[r.dept]||[]).push(r)});return DEPTS.concat(Object.keys(g).filter(function(k){return DEPTS.indexOf(k)<0})).filter(function(k){return g[k]}).map(function(k){return {dept:k,rows:g[k]}})}
 var groups=[];
 function buildGroups(A){
@@ -670,7 +675,7 @@ function renderList(A,list){
     var head='<h2>'+esc(g.name)+'</h2><span class="rowacts"><span class="num"><b>'+money(g.sum)+'</b> <span class="muted small">'+(g.any?"buy at any of your stores":g.have?"from your kitchen or freezer":"flyer ends "+esc(fmtDate(g.store.validTo)))+'</span></span><button class="btn sm" data-copy="'+i+'">Copy</button></span>';
     var note=g.have?'<div class="note">Check you have enough for the servings you are making.</div>':g.any?'<div class="note">Prices here are regular prices'+(regMeta?" at "+esc(regMeta.storeName):"")+', as a guide. Items marked estimate had no price to look up.</div>':(editionOff(g.store)?'<div class="note"><span class="flag">These prices are from the South Windsor edition of this flyer. Your store\'s edition may differ.</span></div>':'');
     return '<div class="store"><header>'+head+'</header>'+note+'<div class="scroll"><table class="list">'+byDept(g.rows).map(function(d){
-      return '<tr class="dept"><th colspan="3">'+esc(d.dept)+'</th></tr>'+d.rows.map(function(r){return r.hv?'<tr class="nochk"><td>'+esc(r.hv.name)+'<br><span class="small muted for">for '+esc(uniq(r.hv.recipes).join("; "))+'</span></td><td class="r small muted">'+(r.hv.game?"from your freezer":"on hand")+'</td><td class="r num">$0.00</td></tr>':r.L?lineRow(r.L,g.store?g.store.validTo:""):estRow(r.est)}).join("")}).join("")+'</table></div></div>'}).join("");
+      return '<tr class="dept"><th colspan="3">'+esc(d.dept)+'</th></tr>'+d.rows.map(function(r){return r.hv?'<tr class="nochk"><td><span class="nm">'+esc(r.hv.name)+'</span><div class="sub"><span class="for">for '+esc(uniq(r.hv.recipes).join("; "))+'</span></div></td><td class="r small muted"><span class="qp">'+(r.hv.game?"from your freezer":"on hand")+'</span></td><td class="r num">$0.00</td></tr>':r.L?lineRow(r.L,g.store?g.store.validTo:""):estRow(r.est)}).join("")}).join("")+'</table></div></div>'}).join("");
   html+='<p class="small muted" style="margin:0;max-width:70ch">Quantities are estimates from serving counts. Open each recipe for exact amounts before you shop. Kitchen staples (garlic, oil, herbs, spices, sauces) are left off.</p>';
   body.innerHTML=html;
 }
