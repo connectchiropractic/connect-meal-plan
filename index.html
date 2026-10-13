@@ -175,7 +175,7 @@ header.site .in{max-width:1080px;margin:0 auto;padding:14px 16px;display:flex;al
 header.site .logo{height:40px;margin:0}
 header.site .brand{display:flex;align-items:center;gap:14px}
 header.site .name{font-family:var(--display);font-weight:700;color:var(--head);letter-spacing:-.01em;font-size:17px;padding-left:14px;border-left:1px solid var(--line)}
-header.site .hright{display:flex;align-items:center;gap:18px}
+header.site .hright{display:flex;align-items:center;gap:10px 14px}
 .addph{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#00704A;background:#fff;border:1.5px solid #00704A;border-radius:6px;padding:8px 12px;cursor:pointer;white-space:nowrap}
 .addph:hover{background:#00704A;color:#fff}
 .favbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:10px 14px;background:#D4E9E2;border-radius:8px;font-size:14px;color:#1E3932}
@@ -194,7 +194,8 @@ button.starbtn{border:0;background:none;cursor:pointer;font-size:22px;line-heigh
 #addPhone li{margin:0 0 8px}
 #addPhone .apn{font-size:13.5px;color:#4a5a55;margin:10px 0 0}
 #addPhone .apu{margin:16px 0 0;padding:10px;background:#D4E9E2;border-radius:6px;text-align:center;font-weight:700;color:#1E3932;font-size:14px}
-@media (max-width:520px){header.site .week{display:none}}
+@media (max-width:520px){header.site .week{display:none}header.site .hright{gap:8px}.addph{padding:8px 10px}}
+@media (max-width:430px){header.site .logo{height:32px;width:auto}.addph{font-size:11px;padding:8px 8px;gap:5px}.sharelbl{display:none}header.site .in{flex-wrap:nowrap;gap:8px}}
 header.site .week{align-items:flex-end;text-align:right}
 header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15px;color:var(--head)}
 .hero{position:relative;overflow:hidden;background:#0F241E;color:#fff}
@@ -258,7 +259,7 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
 
 <header class="site"><div class="in">
   <div class="brand"><img class="logo" src="assets/logo-dark.png" alt="Connect Chiropractic" width="147" height="40"><span class="name">Meal Plan Maker</span></div>
-  <div class="hright"><button type="button" class="addph" data-addphone><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 8v6M9 11h6"/></svg>Add to your phone</button>
+  <div class="hright"><button type="button" class="addph" data-share aria-label="Share this app"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span class="sharelbl">Share</span></button><button type="button" class="addph" data-addphone><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 8v6M9 11h6"/></svg>Add to your phone</button>
   <div class="week"><span class="label">Flyer week</span><span class="dates" id="weekDates">Loading</span></div></div>
 </div></header>
 <dialog id="addPhone" aria-labelledby="apT">
@@ -385,6 +386,7 @@ header.site .week .dates{font-family:var(--display);font-weight:700;font-size:15
   <span>1775 Sprucewood Ave., LaSalle, Ontario · <span class="num">519.966.7222</span> · <a href="https://connectchiropractic.com" target="_blank" rel="noopener">connectchiropractic.com</a></span>
   <span id="footNote">Prices come from public store flyers and are estimates. Check the shelf price before you buy. Recipes link to the sites that wrote them.</span>
   <span data-aphide><a href="#" data-addphone>Add this app to your phone</a></span>
+  <span><a href="#" data-share>Share this app with a friend</a></span>
   <span>Background photo by Sergey Kotenev on Unsplash.</span>
 </footer>
 
@@ -798,6 +800,11 @@ Promise.all([fetch("data/stores.json").then(function(r){return r.json()}),fetch(
   Object.keys(FAV).forEach(function(u){if(!known[u])delete FAV[u]});favUI();
   loaded=true;renderAll();
 }).catch(fail);
+(function(){var url=location.origin+location.pathname,data={title:"Connect Meal Plan Maker",text:"Plan a week of healthy, high-protein meals around what's on sale at your local grocery stores.",url:url};
+document.querySelectorAll("[data-share]").forEach(function(b){b.addEventListener("click",function(e){e.preventDefault();
+  var lbl=b.querySelector(".sharelbl")||b,orig=lbl.textContent;function copied(){lbl.textContent="Link copied";setTimeout(function(){lbl.textContent=orig},2200)}
+  function copy(){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(copied,function(){window.prompt("Copy this link:",url)});else window.prompt("Copy this link:",url)}
+  if(navigator.share){navigator.share(data).catch(function(err){if(!err||err.name!=="AbortError")copy()})}else copy()})})})();
 (function(){var d=document.getElementById("addPhone");if(!d)return;
 var sa=false;try{sa=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true}catch(e){}
 var os=/android/i.test(navigator.userAgent)?"and":"ios";
